@@ -97,5 +97,3 @@ do
     end)
 
 end
-
-plib.Log('test', 'te')
