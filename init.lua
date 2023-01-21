@@ -20,6 +20,8 @@ plib.Owner = owner()
 plib.AngleZero = Angle()
 plib.VectorZero = Vector()
 plib.OwnerIndex = plib.Owner:entIndex()
+plib.ChipName = 'PLib - ' .. plib.Chip:getChipName()
+plib.ChipAuthor = plib.Chip:getChipAuthor()
 
 if (CLIENT) then
 
