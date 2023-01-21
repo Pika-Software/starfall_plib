@@ -1,6 +1,6 @@
 --@name Blink
 --@author PrikolMen:-b
---@includedir plib
+--@includedir starfall_plib
 --@server
 
 --[[-----------------
@@ -16,7 +16,7 @@ local BIND = 8388608
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'plib/init.lua' )
+dofile( 'starfall_plib/init.lua' )
 local Vector = Vector
 local plib = plib
 

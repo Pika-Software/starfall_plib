@@ -1,6 +1,6 @@
 --@name Wall Watcher
 --@author PrikolMen:-b
---@includedir plib
+--@includedir starfall_plib
 --@shared
 
 --[[-----------------
@@ -37,7 +37,7 @@ end
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'plib/init.lua' )
+dofile( 'starfall_plib/init.lua' )
 local ipairs = ipairs
 local table = table
 local plib = plib

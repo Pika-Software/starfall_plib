@@ -1,6 +1,6 @@
 --@name Healing
 --@author PrikolMen:-b
---@includedir plib
+--@includedir starfall_plib
 --@server
 
 --[[-----------------
@@ -18,7 +18,7 @@ local REMOVE_DELAY = 1
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'plib/init.lua' )
+dofile( 'starfall_plib/init.lua' )
 local prop_spawnRate = prop.spawnRate
 local isValid = isValid
 local timer = timer

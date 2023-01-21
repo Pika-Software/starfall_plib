@@ -1,9 +1,9 @@
 --@name Chip Manager
 --@author PrikolMen:-b
---@includedir plib
+--@includedir starfall_plib
 --@shared
 
-dofile( 'plib/init.lua' )
+dofile( 'starfall_plib/init.lua' )
 --[[-----------------
     Configuration
 -----------------]]--
