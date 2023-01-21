@@ -14,19 +14,19 @@ local net = net
 -----------------]]--
 
 -- Audio volume in %
-VOLUME = 100
+local VOLUME = 100
 
 -- TTS hear distantion in hammer units
-HEAR_DIST = 1024
+local HEAR_DIST = 1024
 
 -- Dead Palyers can't talk?
-DEAD_CANT_TALK = true
+local DEAD_CANT_TALK = true
 
 -- Dead Palyers can't hear?
-DEAD_CANT_HEAR = true
+local DEAD_CANT_HEAR = true
 
 -- Hide messages in chat
-HIDE_CHAT_MESSAGES = true
+local HIDE_CHAT_MESSAGES = true
 
 --[[-----------------
          Code
