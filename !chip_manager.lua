@@ -9,6 +9,7 @@ dofile( 'starfall_plib/init.lua' )
 -----------------]]--
 
 local CHIPS = {
+    ['chat_translator'] = { SHARED, true },
     ['wall_watcher'] = { SHARED, true },
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
