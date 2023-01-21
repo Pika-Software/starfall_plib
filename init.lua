@@ -1,3 +1,4 @@
+local isValid = isValid
 local convar = convar
 local SERVER = SERVER
 local CLIENT = CLIENT
@@ -7,9 +8,15 @@ local pcall = pcall
 local team = team
 local math = math
 
+-- Globals
+IsValid = isValid
+
+-- PLib
 plib = {}
 plib.Chip = chip()
 plib.Owner = owner()
+plib.AngleZero = Angle()
+plib.VectorZero = Vector()
 plib.OwnerIndex = plib.Owner:entIndex()
 
 if (CLIENT) then
