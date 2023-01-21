@@ -41,7 +41,7 @@ if (CLIENT) then
     end
 
     function plib.PlayTTS( text, flags, callback )
-        plib.PlayURL( string.format( "http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob", convar.getString( "gmod_language" ), http.urlEncode( text ) ), flags or '', callback )
+        plib.PlayURL( string.format( 'http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob', convar.getString( 'gmod_language' ), http.urlEncode( text ) ), flags or '', callback )
     end
 
     function plib.EnableHUD( onlyOwner )
