@@ -4,6 +4,8 @@ local CLIENT = CLIENT
 local timer = timer
 local Color = Color
 local pcall = pcall
+local team = team
+local math = math
 
 plib = {}
 plib.Chip = chip()
@@ -31,6 +33,15 @@ if (CLIENT) then
         plib.PlayURL( string.format( "http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob", convar.getString( "gmod_language" ), http.urlEncode( text ) ), flags or '', callback )
     end
 
+    function plib.EnableHUD( onlyOwner )
+        if onlyOwner and (plib.Player != plib.Owner) then
+            return false
+        end
+
+        enableHud( plib.Player, true )
+        return true
+    end
+
 end
 
 if (SERVER) then
@@ -47,33 +58,39 @@ if (SERVER) then
         end
     end
 
-    function plib.TeleportOwner()
-        local ent = plib.CreateEntity( 'Seat_Airboat', pos, ang, true, {['PLib - Teleporter'] = true} )
-        if isValid( ent ) then
-            ent:setNoDraw( true )
-            ent:use()
+    function plib.TeleportOwner( pos, ang )
+        if pcall( plib.Owner.setPos, plib.Owner, pos ) then
+            if !ang then return end
+            pcall( plib.Owner.setAngles, plib.Owner, ang )
+        else
+            local ent = plib.CreateEntity( 'Seat_Airboat', pos, ang, true, {['PLib - Teleporter'] = true} )
+            if isValid( ent ) then
+                ent:setNoDraw( true )
+                ent:use()
 
-            timer.simple(0, function()
-                if isValid( ent ) then
-                    seat:ejectDriver()
-                    seat:remove()
-                end
-            end)
-
-            return ent
+                timer.simple(0, function()
+                    if isValid( ent ) then
+                        ent:ejectDriver()
+                        ent:remove()
+                    end
+                end)
+            end
         end
     end
 
 end
 
-do
+plib.White = Color( 255, 255, 255 )
+function plib.Log( title, ... )
+    print( plib.Color, '[' .. title .. ']', plib.White, ... )
+end
 
-    local team = team
+function plib.LerpColor( frac, a, b )
+    return Color( math.lerp( frac, a.r, b.r ), math.lerp( frac, a.g, b.g ), math.lerp( frac, a.b, b.b ) )
+end
 
-    function plib.GetPlayerTeamColor( ply )
-        return team.getColor( ply:getTeam() )
-    end
-
+function plib.GetPlayerTeamColor( ply )
+    return team.getColor( ply:getTeam() )
 end
 
 function plib.GetPlayerCenterPos( ply )
