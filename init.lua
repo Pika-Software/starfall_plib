@@ -82,7 +82,7 @@ end
 
 plib.White = Color( 255, 255, 255 )
 function plib.Log( title, ... )
-    print( plib.Color, '[' .. title .. ']', plib.White, ... )
+    print( plib.Color, '[' .. title .. '] ', plib.White, ... )
 end
 
 function plib.LerpColor( frac, a, b )
