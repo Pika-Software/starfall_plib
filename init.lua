@@ -10,6 +10,8 @@ local math = math
 
 -- Globals
 IsValid = isValid
+PrintTable = printTable
+SHARED = CLIENT or SERVER
 
 -- PLib
 plib = {}
@@ -102,4 +104,23 @@ end
 
 function plib.GetPlayerCenterPos( ply )
     return ply:localToWorld( ply:obbCenter() )
+end
+
+do
+
+    local unpack = unpack
+
+    function plib.fcall( func, ... )
+        local ok, data = pcall( func, ... )
+        if (ok) then
+            return ok, data
+        else
+            local varang = {...}
+            timer.simple(0, function()
+                pcall( func, unpack( varang ) )
+            end)
+        end
+
+    end
+
 end
