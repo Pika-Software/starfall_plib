@@ -87,6 +87,7 @@ if (SERVER) then
 
     hook.add('PlayerSay', chipName, function( ply, text, isTeam )
         if isTeam or (ply:entIndex() != plib.OwnerIndex) then return end
+        if string.startWith( text, '/' ) then return end
 
         local whoHear = {}
         for _, pl in ipairs( find.inSphere( ply:getEyePos(), HEAR_DIST ) ) do
