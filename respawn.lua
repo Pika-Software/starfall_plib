@@ -9,9 +9,17 @@ local chipName = 'PLib - Respawn on Death Point'
          Code
 -----------------]]--
 dofile( 'starfall_plib/init.lua' )
-local plib = plib
+local isValid = isValid
+local net = net
 
 if (SERVER) then
+
+    local table_insert = table.insert
+    local timer_simple = timer.simple
+    local ipairs = ipairs
+    local concmd = concmd
+    local pairs = pairs
+    local plib = plib
 
     local lastDeathPosition = plib.Chip:getPos()
     local activeWeaponClass = nil
@@ -33,16 +41,16 @@ if (SERVER) then
             end
 
             for _, wep in ipairs( ply:getWeapons() ) do
-                table.insert( playerWeapons, wep:getClass() )
+                table_insert( playerWeapons, wep:getClass() )
             end
         end
     end)
 
     hook.add('PlayerSpawn', chipName, function( ply )
         if (ply:entIndex() == plib.OwnerIndex) then
-            timer.simple(0.25, function()
+            timer_simple(0, function()
                 if isValid( ply ) and ply:isAlive() then
-                    ply:setPos( lastDeathPosition )
+                    plib.TeleportOwner( lastDeathPosition )
 
                     for _, class in ipairs( playerWeapons ) do
                         concmd( 'gm_giveswep ' .. class )
@@ -61,10 +69,14 @@ if (SERVER) then
 end
 
 if (CLIENT) then
+
+    local input_selectWeapon = input.selectWeapon
+
     net.receive(chipName, function()
         local wep = ply:getWeapon( net.readString() )
         if isValid( wep ) then
-            input.selectWeapon( wep )
+            input_selectWeapon( wep )
         end
     end)
+
 end
