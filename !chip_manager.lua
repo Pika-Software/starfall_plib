@@ -1,0 +1,33 @@
+--@name Chip Manager
+--@author PrikolMen:-b
+--@includedir plib
+--@shared
+
+dofile( 'plib/init.lua' )
+--[[-----------------
+    Configuration
+-----------------]]--
+
+local CHIPS = {
+    ['wall_watcher'] = { SHARED, true },
+    ['healing'] = { SERVER, true },
+    ['blink'] = { SERVER, true },
+    ['tts'] = { SHARED, true }
+}
+
+--[[-----------------
+         Code
+-----------------]]--
+local dofile = dofile
+local pairs = pairs
+local plib = plib
+
+for fileName, data in pairs( CHIPS ) do
+    if data[2] then
+        if data[1] then
+            plib.Log( 'Chip Manager', fileName .. ': ' .. ( plib.fcall( dofile, fileName .. '.lua' ) and 'OK' or 'FAILED' ) )
+        end
+    else
+        plib.Log( 'Chip Manager', fileName .. ': ' .. 'OFF' )
+    end
+end
