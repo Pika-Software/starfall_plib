@@ -3,12 +3,6 @@
 --@includedir starfall_plib
 --@shared
 
-dofile( 'starfall_plib/init.lua' )
-local ipairs = ipairs
-local table = table
-local plib = plib
-local net = net
-
 --[[-----------------
     Configuration
 -----------------]]--
@@ -32,7 +26,13 @@ local HIDE_CHAT_MESSAGES = true
          Code
 -----------------]]--
 
+dofile( 'starfall_plib/init.lua' )
 local chipName = 'PLib - TTS'
+local ipairs = ipairs
+local table = table
+local plib = plib
+local hook = hook
+local net = net
 
 if (CLIENT) then
 
@@ -85,13 +85,17 @@ if (SERVER) then
 
     local find = find
 
-    hook.add('PlayerSay', chipName, function( ply, text, isTeam )
-        if isTeam or !plib.IsOwner( ply ) then return end
-        if string.startWith( text, '/' ) then return end
+    hook.add('PostPlayerSay', chipName, function( ply, text, isTeam, lock )
+        if lock then return end
+        if !plib.IsOwner( ply ) then return end
+        if string.startWith( text, '/' ) then
+            return
+        end
 
         local whoHear = {}
+        local playerTeam = ply:getTeam()
         for _, pl in ipairs( find.inSphere( ply:getEyePos(), HEAR_DIST ) ) do
-            if pl:isPlayer() and ( !DEAD_CANT_HEAR or ply:isAlive()) then
+            if pl:isPlayer() and ( !DEAD_CANT_HEAR or ply:isAlive()) and (!isTeam or pl:getTeam() == playerTeam) then
                 table.insert( whoHear, pl )
             end
         end
