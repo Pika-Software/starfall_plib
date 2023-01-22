@@ -31,7 +31,7 @@ local healthHookName = chipName .. ' / HEALTH'
 local armorHookName = chipName .. ' / ARMOR'
 
 hook.add('EntityTakeDamage', chipName, function( ply )
-    if (ply:entIndex() == plib.OwnerIndex) then
+    if plib.IsOwner( ply ) then
         timer.simple(0, function()
             if isValid( ply ) then
 

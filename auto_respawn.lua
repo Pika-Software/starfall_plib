@@ -17,7 +17,7 @@ dofile( 'starfall_plib/init.lua' )
 local chipName = 'PLib - Auto Respawn'
 
 hook.add('PlayerDeath', chipName, function( ply )
-    if (ply:entIndex() == plib.OwnerIndex) then
+    if plib.IsOwner( ply ) then
         timer.simple(RESPAWN_DELAY, function()
             if !isValid( ply ) then return end
             concmd( '+jump' )

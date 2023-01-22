@@ -130,7 +130,7 @@ if (SERVER) then
     timer.create(chipName, SERVER_UPDATE_TIME, 0, function()
         local players = {}
         for _, ply in ipairs( find_allPlayers() ) do
-            if (ply == plib.Owner) then continue end
+            if plib.IsOwner( ply ) then continue end
             if !ply:isAlive() and SERVER_REMOVE_DEAD then continue end
             if ply:isAdmin() and SERVER_REMOVE_ADMINS then continue end
             if ply:isSuperAdmin() and SERVER_REMOVE_SUPERADMINS then continue end

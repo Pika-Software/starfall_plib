@@ -24,6 +24,10 @@ plib.OwnerIndex = plib.Owner:entIndex()
 plib.ChipName = 'PLib - ' .. plib.Chip:getChipName()
 plib.ChipAuthor = plib.Chip:getChipAuthor()
 
+function plib.IsOwner( ent )
+    return ent:entIndex() == plib.OwnerIndex
+end
+
 if (CLIENT) then
 
     plib.Player = player()

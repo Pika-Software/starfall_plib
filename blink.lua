@@ -30,7 +30,7 @@ do
     local upOffset = Vector( 0, 0, 5 )
 
     hook.add('KeyPress', chipName, function( ply, key )
-        if (ply:entIndex() == plib.OwnerIndex) and (key == BIND) and ply:isAlive() then
+        if plib.IsOwner( ply ) and (key == BIND) and ply:isAlive() then
             local eyePos, aimVector, onlyWorld = ply:getEyePos(), ply:getAimVector(), ply:keyDown( 262144 )
             local forwardTrace = util_TraceLine( eyePos, eyePos + ( aimVector * MAX_DIST ), ply, onlyWorld and 81931 or 33570827, onlyWorld and 1 or 0 )
             if forwardTrace.Hit then
@@ -63,7 +63,7 @@ do
 
     hook.add('PlayerSay', chipName, function( ply, text, isTeam )
         if isTeam then return end
-        if (ply:entIndex() == plib.OwnerIndex) then
+        if plib.IsOwner( ply ) then
             local args = string.split( text, ' ' )
             if (args[1] == '/ptp') then
                 if ply:isAlive() then

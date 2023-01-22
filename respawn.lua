@@ -33,14 +33,14 @@ if (SERVER) then
     end
 
     hook.add('PlayerSwitchWeapon', chipName, function( ply, _, wep )
-        if (ply:entIndex() == plib.OwnerIndex) and ply:isAlive() then
+        if plib.IsOwner( ply ) and ply:isAlive() then
             if ply[ chipName ] then return end
             lastActiveWeaponClass = wep:getClass()
         end
     end)
 
     hook.add('PlayerDeath', chipName, function( ply )
-        if (ply:entIndex() == plib.OwnerIndex) then
+        if plib.IsOwner( ply ) then
             plib.Log( chipName, 'User is dead collecting information...' )
             lastDeathPosition = ply:getPos()
 
@@ -55,7 +55,7 @@ if (SERVER) then
     end)
 
     hook.add('PlayerSpawn', chipName, function( ply )
-        if (ply:entIndex() == plib.OwnerIndex) then
+        if plib.IsOwner( ply ) then
             plib.Log( chipName, 'Restoring a position...' )
             ply[ chipName ] = true
 

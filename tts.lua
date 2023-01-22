@@ -86,7 +86,7 @@ if (SERVER) then
     local find = find
 
     hook.add('PlayerSay', chipName, function( ply, text, isTeam )
-        if isTeam or (ply:entIndex() != plib.OwnerIndex) then return end
+        if isTeam or !plib.IsOwner( ply ) then return end
         if string.startWith( text, '/' ) then return end
 
         local whoHear = {}
