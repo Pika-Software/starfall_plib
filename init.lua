@@ -1,18 +1,39 @@
 local isValid = isValid
 local convar = convar
+local concmd = concmd
 local SERVER = SERVER
 local CLIENT = CLIENT
+local string = string
 local timer = timer
 local Color = Color
 local pcall = pcall
 local team = team
 local math = math
+local http = http
+local json = json
 
 -- Globals
 IsValid = isValid
 PrintTable = printTable
 CurTime = timer.curtime
 SHARED = CLIENT or SERVER
+
+do
+
+    local debug_getinfo = debug.getinfo
+    local error = error
+    local type = type
+
+    function ArgAssert( value, argNum, argType, errorlevel )
+        local valueType = string.lower( type( value ) )
+        if (valueType == argType) then return end
+
+        local dinfo = debug_getinfo( 2, 'n' )
+        local fname = dinfo and dinfo.name or 'func'
+        error( string.format( 'bad argument #%d to \'%s\' (%s expected, got %s)', argNum, fname, argType, valueType ), errorlevel or 3)
+    end
+
+end
 
 -- PLib
 plib = {}
@@ -34,7 +55,6 @@ if (CLIENT) then
     plib.Color = Color( 255, 193, 7 )
     plib.PlayerIsOwner = plib.Player == plib.Owner
 
-    local http = http
     local bass = bass
 
     function plib.PlayURL( url, flags, callback )
@@ -45,8 +65,14 @@ if (CLIENT) then
         end)
     end
 
+    function plib.GetLanguage()
+        return convar.getString( 'gmod_language' )
+    end
+
     function plib.PlayTTS( text, flags, callback )
-        plib.PlayURL( string.format( 'http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob', convar.getString( 'gmod_language' ), http.urlEncode( text ) ), flags or '', callback )
+        ArgAssert( text, 1, 'string' )
+        ArgAssert( flags, 2, 'string' )
+        plib.PlayURL( string.format( 'http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob', plib.GetLanguage(), http.urlEncode( text ) ), flags or '', callback )
     end
 
     function plib.EnableHUD( onlyOwner )
@@ -56,6 +82,11 @@ if (CLIENT) then
 
         enableHud( plib.Player, true )
         return true
+    end
+
+    function plib.Say( text, teamChat )
+        ArgAssert( text, 1, 'string' )
+        concmd( string.format( '%s "%s"', teamChat and 'say_team' or 'say', text ) )
     end
 
 end
@@ -69,12 +100,15 @@ if (SERVER) then
     do
         local NULL = NULL
         function plib.CreateEntity( class, pos, ang, frozen, extraData )
+            ArgAssert( class, 1, 'string' )
             local ok, ent = pcall( prop.createSent, pos or plib.Chip:getPos(), ang or plib.Chip:getAngles(), class, frozen or false, extraData )
             return ok and ent or NULL
         end
     end
 
     function plib.TeleportOwner( pos, ang )
+        ArgAssert( pos, 1, 'vector' )
+
         if pcall( plib.Owner.setPos, plib.Owner, pos ) then
             if !ang then return end
             pcall( plib.Owner.setAngles, plib.Owner, ang )
@@ -96,11 +130,9 @@ if (SERVER) then
 
 end
 
-do
-    local concmd = concmd
-    function plib.GiveOwnerWeapon( class )
-        concmd( 'gm_giveswep ' .. class )
-    end
+function plib.GiveOwnerWeapon( class )
+    ArgAssert( class, 1, 'string' )
+    concmd( 'gm_giveswep ' .. class )
 end
 
 plib.White = Color( 255, 255, 255 )
@@ -122,19 +154,45 @@ end
 
 do
 
-    local unpack = unpack
+    local url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=%s&tl=%s&dt=t&q=%s'
+    local translateCache = {}
 
-    function plib.fcall( func, ... )
-        local ok, data = pcall( func, ... )
-        if (ok) then
-            return ok, data
-        else
-            local varang = {...}
-            timer.simple(0, function()
-                pcall( func, unpack( varang ) )
-            end)
+    function plib.TranslateText( text, languageCode, callback )
+        ArgAssert( text, 1, 'string' )
+        ArgAssert( languageCode, 2, 'string' )
+        ArgAssert( callback, 3, 'function' )
+
+        local lowerText = string.lower( text )
+        local cached = translateCache[ lowerText ]
+        if (cached) then
+            callback( true, cached[1], cached[2] )
+            return
         end
 
+        http.get(string.format( url, 'auto', languageCode, http.urlEncode( text ) ), function( body, len, headers, code )
+            if (code == 200) then
+                local data = json.decode( body )
+                if (data) then
+                    local level0 = data[1]
+                    if (level0) then
+                        local level1 = level0[1]
+                        if (level1) then
+                            local result = level1[1]
+                            if (result) then
+                                callback( true, result, data[2] )
+                                translateCache[ lowerText ] = { result, data[2] }
+                                return
+                            end
+                        end
+                    end
+                end
+            end
+
+            callback( false, text )
+        end,
+        function( err )
+            callback( false, text )
+        end)
     end
 
 end
