@@ -1,7 +1,6 @@
 if plib then return end
 local isValid = isValid
 local convar = convar
-local concmd = concmd
 local SERVER = SERVER
 local CLIENT = CLIENT
 local string = string
@@ -16,8 +15,12 @@ local json = json
 
 -- Globals
 IsValid = isValid
+http.Post = http.post
+http.Fetch = http.get
 PrintTable = printTable
 CurTime = timer.curtime
+SysTime = timer.systime
+timer.Simple = timer.simple
 SHARED = CLIENT or SERVER
 
 do
@@ -37,6 +40,22 @@ do
 
 end
 
+do
+    local concmd = concmd
+    function RunConsoleCommand( cmd, ... )
+        ArgAssert( cmd, 1, 'string' )
+        local args = {...}
+        if (#args > 0) then
+            concmd( cmd .. ' "' .. table.concat( args, '" "' ) .. '"' )
+        else
+            concmd( cmd )
+        end
+    end
+end
+
+local RunConsoleCommand = RunConsoleCommand
+local ArgAssert = ArgAssert
+
 -- PLib
 plib = {}
 plib.Chip = chip()
@@ -47,25 +66,44 @@ plib.OwnerIndex = plib.Owner:entIndex()
 plib.ChipName = 'PLib - ' .. plib.Chip:getChipName()
 plib.ChipAuthor = plib.Chip:getChipAuthor()
 
-
 function plib.IsOwner( ent )
     return ent:entIndex() == plib.OwnerIndex
 end
 
 if (CLIENT) then
 
+    local render = render
+
     plib.Player = player()
     plib.Color = Color( 255, 193, 7 )
     plib.PlayerIsOwner = plib.Player == plib.Owner
 
-    local bass = bass
+    do
 
-    function plib.PlayURL( url, flags, callback )
-        pcall(bass.loadURL, url, flags, function( channel )
-            if isValid( channel ) and isfunction( callback ) then
-                callback( channel )
-            end
-        end)
+        local select = select
+
+        function ScrW()
+            return select( 1, render.getGameResolution() )
+        end
+
+        function ScrH()
+            return select( -1, render.getGameResolution() )
+        end
+
+    end
+
+    do
+
+        local bass = bass
+
+        function plib.PlayURL( url, flags, callback )
+            pcall(bass.loadURL, url, flags, function( channel )
+                if isValid( channel ) and isfunction( callback ) then
+                    callback( channel )
+                end
+            end)
+        end
+
     end
 
     function plib.GetLanguage()
@@ -89,7 +127,7 @@ if (CLIENT) then
 
     function plib.Say( text, teamChat )
         ArgAssert( text, 1, 'string' )
-        concmd( string.format( '%s "%s"', teamChat and 'say_team' or 'say', text ) )
+        RunConsoleCommand( teamChat and 'say_team' or 'say', text )
     end
 
 end
@@ -247,7 +285,7 @@ end
 
 function plib.GiveOwnerWeapon( class )
     ArgAssert( class, 1, 'string' )
-    concmd( 'gm_giveswep ' .. class )
+    RunConsoleCommand( 'gm_giveswep', class )
 end
 
 plib.White = Color( 255, 255, 255 )
@@ -310,4 +348,25 @@ do
         end)
     end
 
+end
+
+function plib.LookClear()
+    RunConsoleCommand( '-right' )
+    RunConsoleCommand( '-left' )
+end
+
+function plib.LookLeft()
+    RunConsoleCommand( '+left' )
+    RunConsoleCommand( '-right' )
+    timer.Simple(0, plib.LookClear)
+end
+
+function plib.LookRight()
+    RunConsoleCommand( '-left' )
+    RunConsoleCommand( '+right' )
+    timer.Simple(0, plib.LookClear)
+end
+
+function plib.KillOwner()
+    RunConsoleCommand( 'kill' )
 end
