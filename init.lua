@@ -11,6 +11,7 @@ local math = math
 -- Globals
 IsValid = isValid
 PrintTable = printTable
+CurTime = timer.curtime
 SHARED = CLIENT or SERVER
 
 -- PLib
@@ -89,6 +90,13 @@ if (SERVER) then
         end
     end
 
+end
+
+do
+    local concmd = concmd
+    function plib.GiveOwnerWeapon( class )
+        concmd( 'gm_giveswep ' .. class )
+    end
 end
 
 plib.White = Color( 255, 255, 255 )
