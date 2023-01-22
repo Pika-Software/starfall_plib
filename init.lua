@@ -1,3 +1,4 @@
+if plib then return end
 local isValid = isValid
 local convar = convar
 local concmd = concmd
@@ -7,6 +8,7 @@ local string = string
 local timer = timer
 local Color = Color
 local pcall = pcall
+local table = table
 local team = team
 local math = math
 local http = http
@@ -44,6 +46,7 @@ plib.VectorZero = Vector()
 plib.OwnerIndex = plib.Owner:entIndex()
 plib.ChipName = 'PLib - ' .. plib.Chip:getChipName()
 plib.ChipAuthor = plib.Chip:getChipAuthor()
+
 
 function plib.IsOwner( ent )
     return ent:entIndex() == plib.OwnerIndex
@@ -141,6 +144,43 @@ if (SERVER) then
 
         return hook.run( 'PostPlayerSay', ply, onPlayerSay or prePlayerSay or text, isTeam )
     end)
+
+    do
+
+        plib.Commands = plib.Commands or {}
+
+        function plib.ChatCommandAdd( cmd, callback )
+            ArgAssert( cmd, 1, 'string' )
+            ArgAssert( callback, 2, 'function' )
+            plib.Commands[ string.lower( cmd ) ] = callback
+        end
+
+        function plib.ChatCommandExists( cmd )
+            ArgAssert( cmd, 1, 'string' )
+            return plib.Commands[ string.lower( cmd ) ] != nil
+        end
+
+        function plib.ChatCommandRemove( cmd )
+            ArgAssert( cmd, 1, 'string' )
+            plib.Commands[ string.lower( cmd ) ] = nil
+        end
+
+        hook.add('PrePlayerSay', 'PLib - Chat Commands', function( ply, text, isTeam )
+            if isTeam then return end
+            local args = string.split( text, ' ' )
+            local cmd = args[1]
+            if (cmd) then
+                cmd = string.lower( cmd )
+                local func = plib.Commands[ cmd ]
+                if (func) then
+                    table.remove( args, 1 )
+                    pcall( func, ply, cmd, args, table.concat( args, ' ' ) )
+                    return ''
+                end
+            end
+        end)
+
+    end
 
     do
 
