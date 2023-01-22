@@ -33,16 +33,16 @@ local healthHookName = chipName .. ' / HEALTH'
 local armorHookName = chipName .. ' / ARMOR'
 
 hook.add('EntityTakeDamage', chipName, function( ply )
-    if plib.IsOwner( ply ) then
+    if plib.IsOwner( ply ) and ply:isAlive() then
         timer.simple(0, function()
-            if isValid( ply ) then
+            if isValid( ply ) and ply:isAlive() then
                 if HEALTH_GIVE then
                     local nextHealthSpawnTime = 0
                     hook.add('think', healthHookName, function()
                         if nextHealthSpawnTime > timer.curtime() then return end
                         nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
-                        if isValid( ply ) and (ply:getHealth() < ply:getMaxHealth()) then
+                        if isValid( ply ) and ply:isAlive() and (ply:getHealth() < ply:getMaxHealth()) then
                             local pos = HEALTH_USE and plib.Chip:getPos() or ply:getPos()
                             local ent = plib.CreateEntity( HEALTH_CLASS, pos, plib.AngleZero, false )
                             if isValid( ent ) then
@@ -70,7 +70,7 @@ hook.add('EntityTakeDamage', chipName, function( ply )
                         if nextArmorSpawnTime > timer.curtime() then return end
                         nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
-                        if isValid( ply ) and (ply:getArmor() < ply:getMaxArmor()) then
+                        if isValid( ply ) and ply:isAlive() and (ply:getArmor() < ply:getMaxArmor()) then
                             local pos = ARMOR_USE and plib.Chip:getPos() or ply:getPos()
                             local ent = plib.CreateEntity( ARMOR_CLASS, pos, plib.AngleZero, false )
                             if isValid( ent ) then
