@@ -7,36 +7,28 @@
     Configuration
 -----------------]]--
 
-if (CLIENT) then
+-- Low Health Color
+local CLIENT_DEATH_COLOR = Color( 250, 50, 50 )
 
-    -- Low Health Color
-    CLIENT_DEATH_COLOR = Color( 250, 50, 50 )
+-- Friend Filter
+local CLIENT_IGNORE_FRIENDS = true
 
-    -- Friend Filter
-    CLIENT_REMOVE_FRIENDS = true
+-- Update Time
+local CLIENT_UPDATE_TIME = 0.025
 
-    -- Update Time
-    CLIENT_UPDATE_TIME = 0.025
+-- Player Filters
+local SERVER_IGNORE_SUPERADMINS = false
+local SERVER_IGNORE_ADMINS = false
+local SERVER_IGNORE_NOCLIP = false
+local SERVER_IGNORE_DEAD = true
+local SERVER_IGNORE_GOD = true
 
-end
+-- CFC Starfall Ext
+local SERVER_IGNORE_BUILDERS = true
+local SERVER_IGNORE_PVPERS = false
 
-if (SERVER) then
-
-    -- Player Filters
-    SERVER_IGNORE_SUPERADMINS = false
-    SERVER_IGNORE_ADMINS = false
-    SERVER_IGNORE_NOCLIP = false
-    SERVER_IGNORE_DEAD = true
-    SERVER_IGNORE_GOD = true
-
-    -- CFC Starfall Ext
-    SERVER_IGNORE_BUILDERS = true
-    SERVER_IGNORE_PVPERS = false
-
-    -- Update Time
-    SERVER_UPDATE_TIME = 1
-
-end
+-- Update Time
+local SERVER_UPDATE_TIME = 1
 
 --[[-----------------
          Code
@@ -65,6 +57,7 @@ if (CLIENT) then
 
             for _, ply in ipairs( players ) do
                 if !isValid( ply ) then continue end
+                if CLIENT_IGNORE_FRIENDS and (ply:getFriendStatus() == 'friend') then continue end
                 local pos = ply:getPos()
                 local screenData = pos:toScreen()
                 if (screenData) then
@@ -135,13 +128,13 @@ if (SERVER) then
         local players = {}
         for _, ply in ipairs( find_allPlayers() ) do
             if plib.IsOwner( ply ) then continue end
-            if !ply:isAlive() and SERVER_IGNORE_DEAD then continue end
-            if ply:isAdmin() and SERVER_IGNORE_ADMINS then continue end
-            if ply.isInBuild and ply:isInBuild() and SERVER_IGNORE_BUILDERS then continue end
-            if ply.isInPvp and ply:isInPvp() and SERVER_IGNORE_PVPERS then continue end
-            if ply:isSuperAdmin() and SERVER_IGNORE_SUPERADMINS then continue end
-            if ply:isNoclipped() and SERVER_IGNORE_NOCLIP then continue end
-            if ply:hasGodMode() and SERVER_IGNORE_GOD then continue end
+            if SERVER_IGNORE_DEAD and !ply:isAlive() then continue end
+            if SERVER_IGNORE_ADMINS and ply:isAdmin() then continue end
+            if SERVER_IGNORE_BUILDERS and ply.isInBuild and ply:isInBuild() then continue end
+            if SERVER_IGNORE_PVPERS and ply.isInPvp and ply:isInPvp() then continue end
+            if SERVER_IGNORE_SUPERADMINS and ply:isSuperAdmin() then continue end
+            if SERVER_IGNORE_NOCLIP and ply:isNoclipped() then continue end
+            if SERVER_IGNORE_GOD and ply:hasGodMode() then continue end
             table.insert( players, ply )
         end
 
