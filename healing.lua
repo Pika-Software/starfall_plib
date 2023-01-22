@@ -7,9 +7,11 @@
     Configuration
 -----------------]]--
 
+local HEALTH_GIVE = true
 local HEALTH_CLASS = 'item_healthkit'
 local HEALTH_USE = false
 
+local ARMOR_GIVE = true
 local ARMOR_CLASS = 'item_battery'
 local ARMOR_USE = false
 
@@ -34,59 +36,61 @@ hook.add('EntityTakeDamage', chipName, function( ply )
     if plib.IsOwner( ply ) then
         timer.simple(0, function()
             if isValid( ply ) then
+                if HEALTH_GIVE then
+                    local nextHealthSpawnTime = 0
+                    hook.add('think', healthHookName, function()
+                        if nextHealthSpawnTime > timer.curtime() then return end
+                        nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
-                local nextHealthSpawnTime = 0
-                hook.add('think', healthHookName, function()
-                    if nextHealthSpawnTime > timer.curtime() then return end
-                    nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
+                        if isValid( ply ) and (ply:getHealth() < ply:getMaxHealth()) then
+                            local pos = HEALTH_USE and plib.Chip:getPos() or ply:getPos()
+                            local ent = plib.CreateEntity( HEALTH_CLASS, pos, plib.AngleZero, false )
+                            if isValid( ent ) then
+                                if HEALTH_USE then
+                                    ent:use()
+                                end
 
-                    if isValid( ply ) and (ply:getHealth() < ply:getMaxHealth()) then
-                        local pos = HEALTH_USE and plib.Chip:getPos() or ply:getPos()
-                        local ent = plib.CreateEntity( HEALTH_CLASS, pos, plib.AngleZero, false )
-                        if isValid( ent ) then
-                            if HEALTH_USE then
-                                ent:use()
+                                timer.simple(REMOVE_DELAY, function()
+                                    if isValid( ent ) then
+                                        ent:remove()
+                                    end
+                                end)
                             end
 
-                            timer.simple(REMOVE_DELAY, function()
-                                if isValid( ent ) then
-                                    ent:remove()
-                                end
-                            end)
+                            return
                         end
 
-                        return
-                    end
+                        hook.remove('think', healthHookName)
+                    end)
+                end
 
-                    hook.remove('think', healthHookName)
-                end)
+                if ARMOR_GIVE then
+                    local nextArmorSpawnTime = 0
+                    hook.add('think', armorHookName, function()
+                        if nextArmorSpawnTime > timer.curtime() then return end
+                        nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
-                local nextArmorSpawnTime = 0
-                hook.add('think', armorHookName, function()
-                    if nextArmorSpawnTime > timer.curtime() then return end
-                    nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
+                        if isValid( ply ) and (ply:getArmor() < ply:getMaxArmor()) then
+                            local pos = ARMOR_USE and plib.Chip:getPos() or ply:getPos()
+                            local ent = plib.CreateEntity( ARMOR_CLASS, pos, plib.AngleZero, false )
+                            if isValid( ent ) then
+                                if ARMOR_USE then
+                                    ent:use()
+                                end
 
-                    if isValid( ply ) and (ply:getArmor() < ply:getMaxArmor()) then
-                        local pos = ARMOR_USE and plib.Chip:getPos() or ply:getPos()
-                        local ent = plib.CreateEntity( ARMOR_CLASS, pos, plib.AngleZero, false )
-                        if isValid( ent ) then
-                            if ARMOR_USE then
-                                ent:use()
+                                timer.simple(REMOVE_DELAY, function()
+                                    if isValid( ent ) then
+                                        ent:remove()
+                                    end
+                                end)
                             end
 
-                            timer.simple(REMOVE_DELAY, function()
-                                if isValid( ent ) then
-                                    ent:remove()
-                                end
-                            end)
+                            return
                         end
 
-                        return
-                    end
-
-                    hook.remove('think', armorHookName)
-                end)
-
+                        hook.remove('think', armorHookName)
+                    end)
+                end
             end
         end)
     end
