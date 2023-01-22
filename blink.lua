@@ -13,6 +13,9 @@ local MAX_DIST = 100000
 -- Bind - bind t +grenade1
 local BIND = 8388608
 
+-- Teleport to player by name chat command.
+local CHAT_COMMAND = '/ptp'
+
 --[[-----------------
          Code
 -----------------]]--
@@ -49,7 +52,6 @@ end
 
 do
 
-    local isstring = isstring
     local ipairs = ipairs
     local find = find
 
@@ -61,38 +63,41 @@ do
         Vector( 0, -offset, 0 )
     }
 
-    hook.add('PrePlayerSay', chipName, function( ply, text, isTeam )
-        if isTeam then return end
+    plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
         if plib.IsOwner( ply ) then
-            local args = string.split( text, ' ' )
-            if (args[1] == '/ptp') then
-                if ply:isAlive() then
-                    if isstring( args[2] ) then
-                        local plys = find.playersByName( args[2] )
-                        if (plys) then
-                            local target = find.closest( plys, plib.Owner:getPos() )
-                            if isValid( target ) then
-                                if target:isAlive() then
-                                    for _, vec in ipairs( tpOffsets ) do
-                                        local pos = target:localToWorld( vec )
-                                        if pos:isInWorld() then
-                                            plib.TeleportOwner( pos, target:getEyeAngles() )
-                                            plib.Log( chipName, 'Teleported to: ' .. target:getName() )
-                                            break
-                                        end
-                                    end
-                                else
-                                    plib.Log( chipName, target:getName() .. ' is dead!' )
+            if ply:isAlive() then
+                local plys = find.playersByName( nickName )
+                if (plys) then
+                    local target = find.closest( plys, plib.Owner:getPos() )
+                    if isValid( target ) then
+                        if plib.IsOwner( ply ) then
+                            plib.Log( chipName, 'You cannot teleport to yourself!' )
+                            return
+                        end
+
+                        if target:isAlive() then
+                            for _, vec in ipairs( tpOffsets ) do
+                                local pos = target:localToWorld( vec )
+                                if pos:isInWorld() then
+                                    plib.TeleportOwner( pos, target:getEyeAngles() )
+                                    plib.Log( chipName, 'Teleported to: ' .. target:getName() )
+                                    break
                                 end
                             end
+
+                            return
                         end
+
+                        plib.Log( chipName, target:getName() .. ' is dead!' )
+                        return
                     end
-                else
-                    plib.Log( chipName, 'You cannot teleport while dead!' )
                 end
 
-                return ''
+                plib.Log( chipName, 'Target doesn\'t exist!' )
+                return
             end
+
+            plib.Log( chipName, 'You cannot teleport while dead!' )
         end
     end)
 
