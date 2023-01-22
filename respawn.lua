@@ -3,12 +3,18 @@
 --@includedir starfall_plib
 --@shared
 
-local chipName = 'PLib - Respawn'
+--[[-----------------
+    Configuration
+-----------------]]--
+
+-- Delay before performing actions
+local DELAY = 1
 
 --[[-----------------
          Code
 -----------------]]--
 dofile( 'starfall_plib/init.lua' )
+local chipName = 'PLib - Respawn'
 local isValid = isValid
 local net = net
 
@@ -59,7 +65,7 @@ if (SERVER) then
             plib.Log( chipName, 'Restoring a position...' )
             ply[ chipName ] = true
 
-            timer_simple(0, function()
+            timer_simple(DELAY, function()
                 if isValid( ply ) and ply:isAlive() then
                     plib.TeleportOwner( lastDeathPosition )
 
