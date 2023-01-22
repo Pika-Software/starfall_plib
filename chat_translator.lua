@@ -30,15 +30,42 @@ local net = net
 
 if CLIENT and plib.PlayerIsOwner then
 
+    local queue = {}
     hook.add('PlayerChat', chipName, function( ply, text )
         if !TRANSLATE_OTHER_PLAYERS_MESSAGES then return end
         if plib.IsOwner( ply ) then return end
+        if string.IsURL( text ) then return end
         if !TRANSLATE_FRIENDS_MESSAGES and (ply:getFriendStatus() == 'friend') then return end
         local playerNick, playerColor = ply:getName(), plib.GetPlayerTeamColor( ply )
-        plib.TranslateText( text, plib.GetLanguage(), function( ok, result, languageCode )
-            if (languageCode == plib.GetLanguage()) then return end
-            plib.Log( 'Chat Translator', playerColor, playerNick, plib.White, ': ' .. result )
-        end)
+
+        local tbl = {
+            ['ID'] = -1
+        }
+
+        tbl.Function = function()
+            plib.TranslateText( text, TRANSLATE_LANGUAGE, plib.GetLanguage(), function( ok, result, languageCode )
+                if (languageCode == plib.GetLanguage()) then return end
+                plib.Log( 'Chat Translator', playerColor, playerNick, plib.White, ': ' .. result )
+                if (tbl.ID != -1) then
+                    table.remove( queue, tbl.ID )
+                end
+
+                timer.Simple(0.25, function()
+                    local lastID = #queue
+                    if (lastID > 0) then
+                        local data = queue[ lastID ]
+                        if (data) then
+                            data.Function()
+                        end
+                    end
+                end)
+            end)
+        end
+
+        tbl.ID = table.insert( queue, tbl )
+        if (tbl.ID == 1) then
+            tbl.Function()
+        end
     end)
 
     local messagesCache = {}
@@ -52,7 +79,7 @@ if CLIENT and plib.PlayerIsOwner then
             return
         end
 
-        plib.TranslateText(text, TRANSLATE_LANGUAGE, function( ok, result )
+        plib.TranslateText(text, nil, TRANSLATE_LANGUAGE, function( ok, result )
             local fullText = http.base64Encode( chipName .. ';' .. result )
             messagesCache[ textLower ] = fullText
             plib.Say( fullText, isTeam )
@@ -66,6 +93,7 @@ if (SERVER) then
     hook.add('OnPlayerSay', chipName, function( ply, text, isTeam )
         if !TRANSLATE_YOUR_MESSAGES then return end
         if plib.IsOwner( ply ) then
+            if string.IsURL( text ) then return end
             local result = http.base64Decode( text )
             if (result) then
                 local data = string.split( result, ';' )
