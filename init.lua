@@ -315,10 +315,11 @@ do
     local url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=%s&tl=%s&dt=t&q=%s'
     local translateCache = {}
 
-    function plib.TranslateText( text, languageCode, callback )
+    function plib.TranslateText( text, fromLanguageCode, toLanguageCode, callback )
         ArgAssert( text, 1, 'string' )
-        ArgAssert( languageCode, 2, 'string' )
-        ArgAssert( callback, 3, 'function' )
+        ArgAssert( fromLanguageCode, 2, 'string' )
+        ArgAssert( toLanguageCode, 3, 'string' )
+        ArgAssert( callback, 4, 'function' )
 
         local lowerText = string.lower( text )
         local cached = translateCache[ lowerText ]
@@ -327,7 +328,7 @@ do
             return
         end
 
-        http.get(string.format( url, 'auto', languageCode, http.urlEncode( text ) ), function( body, len, headers, code )
+        http.get(string.format( url, fromLanguageCode or 'auto', toLanguageCode, http.urlEncode( text ) ), function( body, len, headers, code )
             if (code == 200) then
                 local data = json.decode( body )
                 if (data) then
