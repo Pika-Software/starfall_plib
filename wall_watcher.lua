@@ -23,11 +23,15 @@ end
 if (SERVER) then
 
     -- Player Filters
-    SERVER_REMOVE_SUPERADMINS = false
-    SERVER_REMOVE_ADMINS = false
-    SERVER_REMOVE_NOCLIP = false
-    SERVER_REMOVE_DEAD = true
-    SERVER_REMOVE_GOD = true
+    SERVER_IGNORE_SUPERADMINS = false
+    SERVER_IGNORE_ADMINS = false
+    SERVER_IGNORE_NOCLIP = false
+    SERVER_IGNORE_DEAD = true
+    SERVER_IGNORE_GOD = true
+
+    -- CFC Starfall Ext
+    SERVER_IGNORE_BUILDERS = true
+    SERVER_IGNORE_PVPERS = false
 
     -- Update Time
     SERVER_UPDATE_TIME = 1
@@ -131,11 +135,13 @@ if (SERVER) then
         local players = {}
         for _, ply in ipairs( find_allPlayers() ) do
             if plib.IsOwner( ply ) then continue end
-            if !ply:isAlive() and SERVER_REMOVE_DEAD then continue end
-            if ply:isAdmin() and SERVER_REMOVE_ADMINS then continue end
-            if ply:isSuperAdmin() and SERVER_REMOVE_SUPERADMINS then continue end
-            if ply:isNoclipped() and SERVER_REMOVE_NOCLIP then continue end
-            if ply:hasGodMode() and SERVER_REMOVE_GOD then continue end
+            if !ply:isAlive() and SERVER_IGNORE_DEAD then continue end
+            if ply:isAdmin() and SERVER_IGNORE_ADMINS then continue end
+            if ply.isInBuild and ply:isInBuild() and SERVER_IGNORE_BUILDERS then continue end
+            if ply.isInPvp and ply:isInPvp() and SERVER_IGNORE_PVPERS then continue end
+            if ply:isSuperAdmin() and SERVER_IGNORE_SUPERADMINS then continue end
+            if ply:isNoclipped() and SERVER_IGNORE_NOCLIP then continue end
+            if ply:hasGodMode() and SERVER_IGNORE_GOD then continue end
             table.insert( players, ply )
         end
 
