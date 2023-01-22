@@ -70,7 +70,7 @@ do
                 if (plys) then
                     local target = find.closest( plys, plib.Owner:getPos() )
                     if isValid( target ) then
-                        if plib.IsOwner( ply ) then
+                        if plib.IsOwner( target ) then
                             plib.Log( chipName, 'You cannot teleport to yourself!' )
                             return
                         end
