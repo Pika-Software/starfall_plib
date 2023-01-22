@@ -1,9 +1,9 @@
---@name Respawn on Death Point
+--@name Respawn
 --@author PrikolMen:-b
 --@includedir starfall_plib
 --@shared
 
-local chipName = 'PLib - Respawn on Death Point'
+local chipName = 'PLib - Respawn'
 
 --[[-----------------
          Code
@@ -17,24 +17,32 @@ if (SERVER) then
     local table_insert = table.insert
     local timer_simple = timer.simple
     local ipairs = ipairs
-    local concmd = concmd
     local pairs = pairs
     local plib = plib
 
     local lastDeathPosition = plib.Chip:getPos()
-    local activeWeaponClass = nil
     local playerWeapons = {}
+
+    local lastActiveWeaponClass = nil
+
+    do
+        local wep = plib.Owner:getActiveWeapon()
+        if isValid( wep ) then
+            lastActiveWeaponClass = wep:getClass()
+        end
+    end
+
+    hook.add('PlayerSwitchWeapon', chipName, function( ply, _, wep )
+        if (ply:entIndex() == plib.OwnerIndex) and ply:isAlive() then
+            if ply[ chipName ] then return end
+            lastActiveWeaponClass = wep:getClass()
+        end
+    end)
 
     hook.add('PlayerDeath', chipName, function( ply )
         if (ply:entIndex() == plib.OwnerIndex) then
+            plib.Log( chipName, 'User is dead collecting information...' )
             lastDeathPosition = ply:getPos()
-
-            local activeWeapon = ply:getActiveWeapon()
-            if isValid( activeWeapon ) then
-                activeWeaponClass = activeWeapon:getClass()
-            else
-                activeWeaponClass = nil
-            end
 
             for key, _ in pairs( playerWeapons ) do
                 playerWeapons[ key ] = nil
@@ -48,18 +56,29 @@ if (SERVER) then
 
     hook.add('PlayerSpawn', chipName, function( ply )
         if (ply:entIndex() == plib.OwnerIndex) then
+            plib.Log( chipName, 'Restoring a position...' )
+            ply[ chipName ] = true
+
             timer_simple(0, function()
                 if isValid( ply ) and ply:isAlive() then
                     plib.TeleportOwner( lastDeathPosition )
 
+                    plib.Log( chipName, 'Weapons preparation...' )
                     for _, class in ipairs( playerWeapons ) do
-                        concmd( 'gm_giveswep ' .. class )
+                        plib.GiveOwnerWeapon( class )
                     end
 
-                    if activeWeaponClass then
-                        net.start( chipName )
-                            net.writeString( activeWeaponClass )
-                        net.send( ply )
+                    if lastActiveWeaponClass then
+                        timer_simple(0.25, function()
+                            if isValid( ply ) then
+                                net.start( chipName )
+                                net.writeString( lastActiveWeaponClass )
+                                net.send( ply )
+
+                                ply[ chipName ] = false
+                                plib.Log( chipName, 'Completed!' )
+                            end
+                        end)
                     end
                 end
             end)
@@ -73,7 +92,7 @@ if (CLIENT) then
     local input_selectWeapon = input.selectWeapon
 
     net.receive(chipName, function()
-        local wep = ply:getWeapon( net.readString() )
+        local wep = plib.Player:getWeapon( net.readString() )
         if isValid( wep ) then
             input_selectWeapon( wep )
         end
