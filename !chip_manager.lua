@@ -23,12 +23,16 @@ local CHIPS = {
          Code
 -----------------]]--
 local dofile = dofile
+local pcall = pcall
 local plib = plib
 
 for fileName, data in pairs( CHIPS ) do
     if data[2] then
         if data[1] then
-            plib.Log( 'Chip Manager', fileName .. ': ' .. ( plib.fcall( dofile, fileName .. '.lua' ) and 'OK' or 'FAILED' ) )
+            local ok, err = pcall( dofile, fileName .. '.lua' )
+            plib.Log( 'Chip Manager', fileName .. ': ' .. ( ok and 'OK' or 'FAILED' ) )
+            if ok then continue end
+            plib.Log( fileName .. '.lua', err )
         end
     else
         plib.Log( 'Chip Manager', fileName .. ': ' .. 'OFF' )
