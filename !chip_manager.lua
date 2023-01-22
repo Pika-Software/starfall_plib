@@ -14,6 +14,7 @@ local CHIPS = {
     ['wall_watcher'] = { SHARED, true },
     ['auto_respawn'] = { SERVER, true },
     ['test_site'] = { SHARED, false },
+    ['prop_gun'] = { SERVER, false },
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
