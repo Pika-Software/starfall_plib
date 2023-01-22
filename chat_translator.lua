@@ -37,7 +37,7 @@ if CLIENT and plib.PlayerIsOwner then
         local playerNick, playerColor = ply:getName(), plib.GetPlayerTeamColor( ply )
         plib.TranslateText( text, plib.GetLanguage(), function( ok, result, languageCode )
             if (languageCode == plib.GetLanguage()) then return end
-            print( playerColor, playerNick, plib.White, ': ' .. result )
+            plib.Log( 'Chat Translator', playerColor, playerNick, plib.White, ': ' .. result )
         end)
     end)
 
