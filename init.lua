@@ -72,7 +72,7 @@ if (CLIENT) then
     function plib.PlayTTS( text, flags, callback )
         ArgAssert( text, 1, 'string' )
         ArgAssert( flags, 2, 'string' )
-        plib.PlayURL( string.format( 'http://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob', plib.GetLanguage(), http.urlEncode( text ) ), flags or '', callback )
+        plib.PlayURL( string.format( 'https://translate.google.com/translate_tts?tl=%s&ie=UTF-8&q=%s&client=tw-ob', plib.GetLanguage(), http.urlEncode( text ) ), flags or '', callback )
     end
 
     function plib.EnableHUD( onlyOwner )
@@ -127,6 +127,20 @@ if (SERVER) then
             end
         end
     end
+
+    hook.add('PlayerSay', 'PLib - Core', function( ply, text, isTeam )
+        local prePlayerSay = hook.run( 'PrePlayerSay', ply, text, isTeam )
+        if (prePlayerSay == false) or (prePlayerSay == '') then
+            return ''
+        end
+
+        local onPlayerSay = hook.run( 'OnPlayerSay', ply, prePlayerSay or text, isTeam )
+        if (onPlayerSay == false) or (onPlayerSay == '') then
+            return ''
+        end
+
+        return hook.run( 'PostPlayerSay', ply, onPlayerSay or prePlayerSay or text, isTeam )
+    end)
 
 end
 
