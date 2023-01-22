@@ -13,8 +13,8 @@ local BIND = 262144
 -- Player Filters
 local IGNORE_SUPERADMINS = false
 local IGNORE_FRIENDS = true
-local IGNORE_ADMINS = false
-local IGNORE_NOCLIP = false
+local IGNORE_ADMINS = true
+local IGNORE_NOCLIP = true
 
 -- CFC Starfall Ext
 local IGNORE_BUILDERS = true
