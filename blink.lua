@@ -61,7 +61,7 @@ do
         Vector( 0, -offset, 0 )
     }
 
-    hook.add('PlayerSay', chipName, function( ply, text, isTeam )
+    hook.add('PrePlayerSay', chipName, function( ply, text, isTeam )
         if isTeam then return end
         if plib.IsOwner( ply ) then
             local args = string.split( text, ' ' )
@@ -77,7 +77,7 @@ do
                                         local pos = target:localToWorld( vec )
                                         if pos:isInWorld() then
                                             plib.TeleportOwner( pos, target:getEyeAngles() )
-                                            plib.Log( chipName, 'OK:', target:getName() )
+                                            plib.Log( chipName, 'Teleported to: ' .. target:getName() )
                                             break
                                         end
                                     end
