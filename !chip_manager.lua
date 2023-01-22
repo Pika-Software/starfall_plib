@@ -22,7 +22,6 @@ local CHIPS = {
          Code
 -----------------]]--
 local dofile = dofile
-local pairs = pairs
 local plib = plib
 
 for fileName, data in pairs( CHIPS ) do
