@@ -56,6 +56,11 @@ end
 local RunConsoleCommand = RunConsoleCommand
 local ArgAssert = ArgAssert
 
+function string.IsURL( str )
+    ArgAssert( str, 1, 'string' )
+    return string.match( str, '^https?://.*' ) ~= nil
+end
+
 -- PLib
 plib = {}
 plib.Chip = chip()
