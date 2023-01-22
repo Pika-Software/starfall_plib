@@ -47,9 +47,10 @@ do
         local args = {...}
         if (#args > 0) then
             concmd( cmd .. ' "' .. table.concat( args, '" "' ) .. '"' )
-        else
-            concmd( cmd )
+            return
         end
+
+        concmd( cmd )
     end
 end
 
