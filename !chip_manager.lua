@@ -11,6 +11,7 @@ dofile( 'starfall_plib/init.lua' )
 local CHIPS = {
     ['chat_translator'] = { SHARED, true },
     ['wall_watcher'] = { SHARED, true },
+    ['auto_respawn'] = { SERVER, true },
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['blink'] = { SERVER, true },
