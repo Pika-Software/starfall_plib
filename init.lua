@@ -342,9 +342,6 @@ do
             end
 
             callback( false, text )
-        end,
-        function( err )
-            callback( false, text )
         end)
     end
 
