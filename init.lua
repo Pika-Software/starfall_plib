@@ -142,6 +142,67 @@ if (SERVER) then
         return hook.run( 'PostPlayerSay', ply, onPlayerSay or prePlayerSay or text, isTeam )
     end)
 
+    do
+
+        local buttonClasses = {
+            ['momentary_rot_button'] = true,
+            ['func_rot_button'] = true,
+            ['func_button'] = true,
+            ['gmod_button'] = true
+        }
+
+        function plib.IsButton( ent )
+            if buttonClasses[ ent:getClass() ] then
+                return true
+            end
+
+            return false
+        end
+
+    end
+
+end
+
+do
+
+    local propClasses = {
+        ['prop_detail'] = true,
+        ['prop_static'] = true,
+        ['prop_physics'] = true,
+        ['prop_ragdoll'] = true,
+        ['prop_dynamic'] = true,
+        ['prop_physics_override'] = true,
+        ['prop_dynamic_override'] = true,
+        ['prop_physics_multiplayer'] = true
+    }
+
+    function plib.IsProp( ent )
+        if propClasses[ ent:getClass() ] then
+            return true
+        end
+
+        return false
+    end
+
+end
+
+do
+
+    local doorClasses = {
+        ['prop_testchamber_door'] = true,
+        ['prop_door_rotating'] = true,
+        ['func_door_rotating'] = true,
+        ['func_door'] = true
+    }
+
+    function plib.IsDoor( ent )
+        if doorClasses[ ent:getClass() ] then
+            return true
+        end
+
+        return false
+    end
+
 end
 
 function plib.GiveOwnerWeapon( class )
