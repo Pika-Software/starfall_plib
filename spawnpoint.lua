@@ -8,8 +8,10 @@
 -----------------]]--
 dofile( 'starfall_plib/init.lua' )
 local chipName = 'PLib - Spawnpoint'
-local posOffset = Vector( 0, 0, 25 )
 local angOffset = Angle( 90 )
+local IsValid = IsValid
+local Vector = Vector
+local pcall = pcall
 local plib = plib
 
 local chip = plib.Chip
@@ -40,7 +42,9 @@ hook.Add('think', chipName, function()
         ent:setParent( chip )
 
         hook.Add('PlayerSpawn', chipName, function( ply )
-            plib.TeleportOwner( chip:localToWorld( posOffset ) )
+            if plib.IsOwner( ply ) then
+                plib.TeleportOwner( chip:getPos() - Vector( 0, 0, ply:obbMins()[3] ) )
+            end
         end)
     end
 end)
