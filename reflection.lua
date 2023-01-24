@@ -42,6 +42,8 @@ hook.Add('think', chipName, function()
     for _, ent in ipairs( find_inSphere( plib.GetEntityCenterPos( owner ), DISTANCE ) ) do
         if (ent:getOwner() == owner) then continue end
         if ent:isPlayer() then continue end
+        nextCatch = CurTime() + 0.025
+
         if BLACKLIST[ ent:getClass() ] then
             local vel = ent:getVelocity()
             local dir = vel:getNormalized()
