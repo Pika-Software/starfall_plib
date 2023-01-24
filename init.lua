@@ -4,6 +4,7 @@ local convar = convar
 local SERVER = SERVER
 local CLIENT = CLIENT
 local string = string
+local Vector = Vector
 local timer = timer
 local Color = Color
 local pcall = pcall
@@ -15,11 +16,13 @@ local json = json
 
 -- Globals
 IsValid = isValid
+hook.Add = hook.add
 http.Post = http.post
 http.Fetch = http.get
 PrintTable = printTable
 CurTime = timer.curtime
 SysTime = timer.systime
+hook.Remove = hook.remove
 timer.Simple = timer.simple
 SHARED = CLIENT or SERVER
 
@@ -59,7 +62,7 @@ local ArgAssert = ArgAssert
 
 function string.IsURL( str )
     ArgAssert( str, 1, 'string' )
-    return string.match( str, '^https?://.*' ) ~= nil
+    return string.match( str, '^https?://.*' ) != nil
 end
 
 -- PLib
@@ -373,4 +376,14 @@ end
 
 function plib.KillOwner()
     RunConsoleCommand( 'kill' )
+end
+
+do
+
+    local trace = trace
+
+    function plib.TraceLineUp( pos, dist, ... )
+        return trace.trace( pos, pos + Vector( 0, 0, dist ), ... )
+    end
+
 end
