@@ -13,6 +13,12 @@ local VOLUME = 100
 -- TTS hear distantion in hammer units
 local HEAR_DIST = 1024
 
+-- All chat messages will be converted to tts
+local AUTO_TTS = false
+
+-- TTS by chat command
+local CHAT_COMMAND = '/ptts'
+
 -- Dead Palyers can't talk?
 local DEAD_CANT_TALK = true
 
@@ -85,13 +91,7 @@ if (SERVER) then
 
     local find = find
 
-    hook.add('PostPlayerSay', chipName, function( ply, text, isTeam, lock )
-        if lock then return end
-        if !plib.IsOwner( ply ) then return end
-        if string.startWith( text, '/' ) then
-            return
-        end
-
+    function TTS( ply, text, isTeam )
         local whoHear = {}
         local playerTeam = ply:getTeam()
         for _, pl in ipairs( find.inSphere( ply:getEyePos(), HEAR_DIST ) ) do
@@ -108,6 +108,20 @@ if (SERVER) then
         if HIDE_CHAT_MESSAGES then
             return ''
         end
+    end
+
+    hook.add('PostPlayerSay', chipName, function( ply, text, isTeam )
+        if !plib.IsOwner( ply ) then return end
+        if !AUTO_TTS or string.startWith( text, '/' ) then
+            return
+        end
+
+        return TTS( ply, text, isTeam )
+    end)
+
+    plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, text, isTeam )
+        if !plib.IsOwner( ply ) then return end
+        TTS( ply, text, isTeam )
     end)
 
 end
