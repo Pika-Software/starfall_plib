@@ -64,41 +64,40 @@ do
     }
 
     plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
-        if plib.IsOwner( ply ) then
-            if ply:isAlive() then
-                local plys = find.playersByName( nickName )
-                if (plys) then
-                    local target = find.closest( plys, plib.Owner:getPos() )
-                    if isValid( target ) then
-                        if plib.IsOwner( target ) then
-                            plib.Log( chipName, 'You cannot teleport to yourself!' )
-                            return
-                        end
-
-                        if target:isAlive() then
-                            for _, vec in ipairs( tpOffsets ) do
-                                local pos = target:localToWorld( vec )
-                                if pos:isInWorld() then
-                                    plib.TeleportOwner( pos, target:getEyeAngles() )
-                                    plib.Log( chipName, 'Teleported to: ' .. target:getName() )
-                                    break
-                                end
-                            end
-
-                            return
-                        end
-
-                        plib.Log( chipName, target:getName() .. ' is dead!' )
+        if !plib.IsOwner( ply ) then return end
+        if ply:isAlive() then
+            local plys = find.playersByName( nickName )
+            if (plys) then
+                local target = find.closest( plys, plib.Owner:getPos() )
+                if isValid( target ) then
+                    if plib.IsOwner( target ) then
+                        plib.Log( chipName, 'You cannot teleport to yourself!' )
                         return
                     end
-                end
 
-                plib.Log( chipName, 'Target doesn\'t exist!' )
-                return
+                    if target:isAlive() then
+                        for _, vec in ipairs( tpOffsets ) do
+                            local pos = target:localToWorld( vec )
+                            if pos:isInWorld() then
+                                plib.TeleportOwner( pos, target:getEyeAngles() )
+                                plib.Log( chipName, 'Teleported to: ' .. target:getName() )
+                                break
+                            end
+                        end
+
+                        return
+                    end
+
+                    plib.Log( chipName, target:getName() .. ' is dead!' )
+                    return
+                end
             end
 
-            plib.Log( chipName, 'You cannot teleport while dead!' )
+            plib.Log( chipName, 'Target doesn\'t exist!' )
+            return
         end
+
+        plib.Log( chipName, 'You cannot teleport while dead!' )
     end)
 
 end
