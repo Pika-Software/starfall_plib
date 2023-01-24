@@ -1,0 +1,60 @@
+--@name Anti-Blind
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@client
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.lua' )
+if !plib.EnableHUD( true ) then return end
+
+local chipName = 'PLib - Anti-Blind'
+local render = render
+
+render.createRenderTarget( chipName )
+
+local w, h = ScrW(), ScrH()
+local ply = plib.Owner
+
+local view = {
+    ['origin'] = Vector( 0, 0, 0 ),
+    ['angles'] = Angle( 0, 0, 0 ),
+    ['x'] = 0,
+    ['y'] = 0,
+    ['w'] = w,
+    ['h'] = h
+}
+
+view.fov = ply:getFOV()
+
+hook.add('renderscene', chipName, function()
+    if isValid( ply ) then
+        local att = ply:lookupAttachment( 'eyes' )
+        if (att) then
+            local data = ply:getAttachment( att )
+            if (data) then
+                view.origin = data.Pos
+                view.angles = ply:getEyeAngles()
+            end
+        end
+    end
+
+    render.selectRenderTarget( chipName )
+    render.renderView( view )
+    render.selectRenderTarget()
+end)
+
+local mat_temp = material.create( 'gmodscreenspace' )
+mat_temp:setTextureRenderTarget( '$basetexture', chipName )
+
+local cam_2d = {
+    ['type'] = '2D'
+}
+
+hook.add('drawhud', chipName, function()
+    render.pushViewMatrix( cam_2d )
+        render.setMaterial( mat_temp )
+        render.drawTexturedRect( 0, 0, w, h )
+    render.popViewMatrix()
+end)
