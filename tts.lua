@@ -43,7 +43,7 @@ if (CLIENT) then
         if !isValid( ply ) then return end
         plib.PlayTTS(net.readString(), '3d', function( channel )
             table.insert( phrases, channel )
-            channel:setPos( plib.GetPlayerCenterPos( ply ) )
+            channel:setPos( plib.GetEntityCenterPos( ply ) )
             channel:setFade( 200, HEAR_DIST * 2 )
             channel:setVolume( VOLUME / 100 )
             channel:play()
@@ -59,7 +59,7 @@ if (CLIENT) then
                 if isValid( channel ) then
                     if ( !DEAD_CANT_TALK or owner:isAlive() ) then
                         if ( !DEAD_CANT_HEAR or localPlayer:isAlive() ) then
-                            channel:setPos( plib.GetPlayerCenterPos( owner ) )
+                            channel:setPos( plib.GetEntityCenterPos( owner ) )
                             channel:setVolume( VOLUME / 100 )
                         else
                             channel:setVolume( 0 )

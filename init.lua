@@ -310,8 +310,8 @@ function plib.GetPlayerTeamColor( ply )
     return team.getColor( ply:getTeam() )
 end
 
-function plib.GetPlayerCenterPos( ply )
-    return ply:localToWorld( ply:obbCenter() )
+function plib.GetEntityCenterPos( ent )
+    return ent:localToWorld( ent:obbCenter() )
 end
 
 do
