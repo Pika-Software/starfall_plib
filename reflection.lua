@@ -1,0 +1,73 @@
+--@name Reflection
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+
+local DISTANCE = 512
+
+local MODEL = 'models/props_building_details/Storefront_Template001a_Bars.mdl' -- 'models/hunter/blocks/cube075x1x1.mdl'
+
+local BLACKLIST = {
+    ['lunasflightschool_missile'] = true,
+    ['prop_combine_ball'] = true,
+    ['npc_grenade_frag'] = true,
+    ['crossbow_bolt'] = true,
+    ['arccw_rpg7_he'] = true,
+    ['grenade_ar2'] = true,
+    ['rpg_missile'] = true
+}
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.lua' )
+local chipName = 'PLib - Reflection'
+local find_inSphere = find.inSphere
+local timer_Simple = timer.Simple
+local owner = plib.Owner
+local CurTime = CurTime
+local IsValid = IsValid
+local ipairs = ipairs
+local prop = prop
+local plib = plib
+local math = math
+
+local nextCatch = 0
+hook.Add('think', chipName, function()
+    if (nextCatch >= CurTime()) then return end
+    for _, ent in ipairs( find_inSphere( plib.GetEntityCenterPos( owner ), DISTANCE ) ) do
+        if (ent:getOwner() == owner) then continue end
+        if ent:isPlayer() then continue end
+        if BLACKLIST[ ent:getClass() ] then
+            local vel = ent:getVelocity()
+            local dir = vel:getNormalized()
+
+            local dirNum = 3
+            local x, y, z = math.abs( dir[1] ), math.abs( dir[2] ), math.abs( dir[3] )
+            if (x > y) and (x > z) then
+                dirNum = 1
+            elseif (y > x) and (y > z) then
+                dirNum = 2
+            elseif (z > x) and (z > y) then
+                dirNum = 3
+            end
+
+            local ok, new = pcall( prop.create, ent:localToWorld( dir * (math.abs( ent:obbMaxs()[ dirNum ] - ent:obbMins()[ dirNum ] ) + 2) ), dir:getAngle(), MODEL, true )
+            if ok and IsValid( new ) then
+                nextCatch = CurTime() + (1 / prop.spawnRate())
+                new:setCollisionGroup( 15 )
+                new:setNoDraw( true )
+
+                timer_Simple(0.25, function()
+                    if IsValid( new ) then
+                        new:remove()
+                    end
+                end)
+            end
+        end
+    end
+end)
