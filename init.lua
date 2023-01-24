@@ -194,6 +194,8 @@ if (SERVER) then
 
     do
 
+        local isbool = isbool
+
         plib.Commands = plib.Commands or {}
 
         function plib.ChatCommandAdd( cmd, callback )
@@ -213,7 +215,6 @@ if (SERVER) then
         end
 
         hook.add('PrePlayerSay', 'PLib - Chat Commands', function( ply, text, isTeam )
-            if isTeam then return end
             local args = string.split( text, ' ' )
             local cmd = args[1]
             if (cmd) then
@@ -221,7 +222,15 @@ if (SERVER) then
                 local func = plib.Commands[ cmd ]
                 if (func) then
                     table.remove( args, 1 )
-                    pcall( func, ply, cmd, args, table.concat( args, ' ' ) )
+                    local ok, msg = pcall( func, ply, cmd, args, table.concat( args, ' ' ), isTeam )
+                    if ok then
+                        if isstring( msg ) then
+                            return msg
+                        elseif (msg == true) then
+                            return
+                        end
+                    end
+
                     return ''
                 end
             end
@@ -298,6 +307,9 @@ function plib.GiveOwnerWeapon( class )
 end
 
 plib.White = Color( 255, 255, 255 )
+plib.Green = Color( 50, 200, 100 )
+plib.Red = Color( 200, 50, 50 )
+
 function plib.Log( title, ... )
     print( plib.Color, '[' .. title .. '] ', plib.White, ... )
 end
