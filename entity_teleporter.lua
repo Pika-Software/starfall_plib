@@ -1,0 +1,34 @@
+--@name Entity Teleporter
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local CHAT_COMMAND = '/ptpe'
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.lua' )
+local chipName = 'PLib - Entity Teleporter'
+local isValid = isValid
+local pcall = pcall
+local plib = plib
+local find = find
+
+plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
+    if !plib.IsOwner( ply ) then return end
+    local plys = find.playersByName( nickName )
+    if (plys) then
+        local target = find.closest( plys, ply:getPos() )
+        if isValid( target ) then
+            local ent = ply:getEyeTrace().Entity
+            if isValid( ent ) then
+                local ok = pcall( ent.setPos, ent, target:getPos() )
+                plib.Log( chipName, ent:getClass() .. ' to ', plib.GetPlayerTeamColor( target ), target:getName(), plib.White, ': ', ok and plib.Green or plib.Red, ok and 'Good' or 'Failed' )
+            end
+        end
+    end
+end)
