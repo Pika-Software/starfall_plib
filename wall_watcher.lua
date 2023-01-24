@@ -11,7 +11,7 @@
 local CLIENT_DEATH_COLOR = Color( 250, 50, 50 )
 
 -- Friend Filter
-local CLIENT_IGNORE_FRIENDS = true
+local CLIENT_IGNORE_FRIENDS = false
 
 -- Update Time
 local CLIENT_UPDATE_TIME = 0.025
