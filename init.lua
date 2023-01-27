@@ -194,8 +194,6 @@ if (SERVER) then
 
     do
 
-        local isbool = isbool
-
         plib.Commands = plib.Commands or {}
 
         function plib.ChatCommandAdd( cmd, callback )
@@ -223,7 +221,7 @@ if (SERVER) then
                 if (func) then
                     table.remove( args, 1 )
                     local ok, msg = pcall( func, ply, cmd, args, table.concat( args, ' ' ), isTeam )
-                    if ok then
+                    if (ok) then
                         if isstring( msg ) then
                             return msg
                         elseif (msg == true) then
