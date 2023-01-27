@@ -7,18 +7,20 @@ dofile( 'starfall_plib/init.lua' )
 --[[-----------------
     Configuration
 -----------------]]--
-
 local CHIPS = {
-    ['chat_translator'] = { SHARED, false },
+    ['entity_teleporter'] = { SERVER, false },
+    ['chat_translator'] = { SHARED, true },
     ['jiggles_flex'] = { CLIENT, false },
+    ['auto_respawn'] = { SERVER, false },
     ['wall_watcher'] = { SHARED, true },
-    ['auto_respawn'] = { SERVER, true },
+    ['anti_blind'] = { CLIENT, false },
     ['test_site'] = { SHARED, false },
+    ['reflection'] = { SERVER, true },
     ['prop_gun'] = { SERVER, false },
     ['healing'] = { SERVER, false },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
-    ['aimbot'] = { CLIENT, true },
+    ['aimbot'] = { CLIENT, false },
     ['blink'] = { SERVER, true },
     ['tts'] = { SHARED, true }
 }
