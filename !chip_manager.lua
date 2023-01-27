@@ -8,16 +8,16 @@ dofile( 'starfall_plib/init.lua' )
     Configuration
 -----------------]]--
 local CHIPS = {
-    ['entity_teleporter'] = { SERVER, false },
+    ['entity_teleporter'] = { SERVER, true },
     ['chat_translator'] = { SHARED, true },
     ['jiggles_flex'] = { CLIENT, false },
-    ['auto_respawn'] = { SERVER, false },
+    ['auto_respawn'] = { SERVER, true },
     ['wall_watcher'] = { SHARED, true },
     ['anti_blind'] = { CLIENT, false },
     ['test_site'] = { SHARED, false },
     ['reflection'] = { SERVER, true },
     ['prop_gun'] = { SERVER, false },
-    ['healing'] = { SERVER, false },
+    ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
     ['aimbot'] = { CLIENT, false },
