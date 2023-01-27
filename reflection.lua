@@ -7,7 +7,7 @@
     Configuration
 -----------------]]--
 
-local DISTANCE = 512
+local DISTANCE = 256
 
 local MODEL = 'models/props_building_details/Storefront_Template001a_Bars.mdl' -- 'models/hunter/blocks/cube075x1x1.mdl'
 
