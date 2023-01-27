@@ -38,34 +38,23 @@ if CLIENT and plib.PlayerIsOwner then
         if !TRANSLATE_FRIENDS_MESSAGES and (ply:getFriendStatus() == 'friend') then return end
         local playerNick, playerColor = ply:getName(), plib.GetPlayerTeamColor( ply )
 
-        local tbl = {
-            ['ID'] = -1
-        }
-
-        tbl.Function = function()
+        table.insert(queue, function()
             plib.TranslateText( text, TRANSLATE_LANGUAGE, plib.GetLanguage(), function( ok, result, languageCode )
                 if (languageCode == plib.GetLanguage()) then return end
                 plib.Log( 'Chat Translator', playerColor, playerNick, plib.White, ': ' .. result )
-                if (tbl.ID != -1) then
-                    table.remove( queue, tbl.ID )
-                end
-
-                timer.Simple(0.25, function()
-                    local lastID = #queue
-                    if (lastID > 0) then
-                        local data = queue[ lastID ]
-                        if (data) then
-                            data.Function()
-                        end
-                    end
-                end)
             end)
+        end)
+    end)
+
+    timer.create(chipName, 0.3, 0, function()
+        if (#queue < 1) then return end
+        local index = 1
+        local func = queue[ index ]
+        if (func) then
+            pcall( func )
         end
 
-        tbl.ID = table.insert( queue, tbl )
-        if (tbl.ID == 1) then
-            tbl.Function()
-        end
+        table.remove( queue, index )
     end)
 
     local messagesCache = {}
