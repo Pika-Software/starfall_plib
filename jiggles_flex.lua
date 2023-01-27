@@ -19,10 +19,10 @@ local plib = plib
 
 local function Update( bool )
     local legBones = { 'l_thigh', 'l_calf', 'l_foot', 'l_toe', 'r_thigh', 'r_calf', 'r_foot', 'r_toe' }
-    for _, pl in ipairs( find.allPlayers() ) do
-        if !ONLY_OWNER or plib.IsOwner( pl ) then
-            for i = 0, pl:getBoneCount() - 1 do
-                local boneName = string.lower( pl:getBoneName( i ) )
+    for _, ply in ipairs( find.allPlayers() ) do
+        if !ONLY_OWNER or plib.IsOwner( ply ) then
+            for bone = 0, ply:getBoneCount() - 1 do
+                local boneName = string.lower( ply:getBoneName( bone ) )
                 if boneName and (boneName ~= nil) then
                     local allowed = true
                     if !FULL_BODY then
@@ -35,12 +35,12 @@ local function Update( bool )
                     end
 
                     if allowed then
-                        pl:manipulateBoneJiggle( i, bool or false )
+                        ply:manipulateBoneJiggle( bone, bool or false )
                         continue
                     end
                 end
 
-                pl:manipulateBoneJiggle( i, false )
+                ply:manipulateBoneJiggle( bone, false )
             end
         end
     end
