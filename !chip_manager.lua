@@ -10,7 +10,7 @@ dofile( 'starfall_plib/init.lua' )
 local CHIPS = {
     ['entity_teleporter'] = { SERVER, false },
     ['chat_translator'] = { SHARED, true },
-    ['jiggles_flex'] = { CLIENT, true },
+    ['jiggles_flex'] = { CLIENT, false },
     ['auto_respawn'] = { SERVER, false },
     ['wall_watcher'] = { SHARED, false },
     ['anti_blind'] = { CLIENT, false },
