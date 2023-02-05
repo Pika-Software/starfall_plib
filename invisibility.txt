@@ -1,0 +1,98 @@
+--@name Invisibility
+--@author PrikolMen:-b & Angelokk
+--@includedir starfall_plib
+--@shared
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local ENABLE = false
+local ONLY_OWNER = false
+local ALL_ENTITIES = true
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'PLib - Invisibility'
+local color0 = Color( 0, 0, 0, 0 )
+local color1 = Color( 255, 255, 255 )
+local find_allPlayers = find.allPlayers
+local find_all = find.all
+local IsValid = IsValid
+local SERVER = SERVER
+local ipairs = ipairs
+local pcall = pcall
+
+local function setEntityInvisible( ent, bool )
+    pcall( ent.setCollisionGroup, ent, bool and 12 or 0 )
+    pcall( ent.setColor, ent, bool and color0 or color1 )
+    pcall( ent.setNoDraw, ent, bool == true )
+
+    if (SERVER) then
+        pcall( ent.setNocollideAll, ent, bool == true )
+    end
+end
+
+local function setPlayerInvisible( ply, bool )
+    setEntityInvisible( ply, bool or false )
+
+    if (bool) then
+        local ok, wep = pcall( ply.getActiveWeapon, ply )
+        if ok and IsValid( wep ) then
+            setEntityInvisible( wep, true )
+        end
+
+        return
+    end
+
+    local ok, weps = pcall( ply.getWeapons, ply )
+    if (ok) then
+        for _, wep in ipairs( weps ) do
+            setEntityInvisible( wep, false )
+        end
+    end
+end
+
+local owner = plib.Owner
+local function setInvisible( bool )
+    if (ALL_ENTITIES) then
+        local corout = coroutine.wrap( function( a )
+            for _, ent in ipairs( find_all() ) do
+                setEntityInvisible( ent, a )
+                coroutine.yield()
+            end
+
+            return true
+        end )
+
+        hook.add( 'think', chipName, function()
+            while quotaAverage() < quotaMax() * 0.9 do
+                if corout( bool ) then
+                    hook.remove( 'think', chipName )
+                    return
+                end
+            end
+        end)
+
+        return
+    end
+
+    if (ONLY_OWNER) then
+        setPlayerInvisible( owner, bool )
+        return
+    end
+
+    for _, ply in ipairs( find_allPlayers() ) do
+       setPlayerInvisible( ply, bool )
+    end
+end
+
+timer.create( chipName, 3, 0, function()
+    setInvisible( ENABLE )
+end )
+
+hook.add('Removed', chipName, function()
+    timer.remove( chipName )
+    setInvisible( false )
+end)
