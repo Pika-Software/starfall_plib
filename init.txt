@@ -15,6 +15,7 @@ local http = http
 local json = json
 
 -- Globals
+Lerp = math.lerp
 IsValid = isValid
 hook.Add = hook.add
 http.Post = http.post
@@ -71,12 +72,17 @@ plib.Chip = chip()
 plib.Owner = owner()
 plib.AngleZero = Angle()
 plib.VectorZero = Vector()
+plib.ChipIndex = plib.Chip:entIndex()
 plib.OwnerIndex = plib.Owner:entIndex()
 plib.ChipName = 'PLib - ' .. plib.Chip:getChipName()
 plib.ChipAuthor = plib.Chip:getChipAuthor()
 
 function plib.IsOwner( ent )
     return ent:entIndex() == plib.OwnerIndex
+end
+
+function plib.IsChip( ent )
+    return ent:entIndex() == plib.ChipIndex
 end
 
 if (CLIENT) then
@@ -154,6 +160,32 @@ if (SERVER) then
             local ok, ent = pcall( prop.createSent, pos or plib.Chip:getPos(), ang or plib.Chip:getAngles(), class, frozen or false, extraData )
             return ok and ent or NULL
         end
+    end
+
+    function plib.KillPlayer( ply )
+        local maxs = ply:obbMaxs()
+        maxs[1] = 0
+        maxs[2] = 0
+        maxs[3] = maxs[3] + 5
+        local ok, ent = pcall( prop.create, ply:localToWorld( maxs ), ply:getAngles(), 'models/props_junk/PopCan01a.mdl', false )
+        if ok and isValid( ent ) then
+            local phys = ent:getPhysicsObject()
+            if isValid( phys ) then
+                phys:setMass( 1000000 )
+                phys:addGameFlags( FVPHYSICS.DMG_DISSOLVE )
+                phys:addVelocity( Vector( 0, 0, -1000000 ) )
+            end
+
+            timer.simple( 0.25, function()
+                if isValid( ent ) then
+                    ent:remove()
+                end
+            end )
+
+            return true
+        end
+
+        return false
     end
 
     function plib.TeleportOwner( pos, ang )
