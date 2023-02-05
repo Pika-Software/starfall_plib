@@ -13,7 +13,7 @@ local RESPAWN_DELAY = 3
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local RunConsoleCommand = RunConsoleCommand
 local timer_Simple = timer.Simple
 local chipName = 'PLib - Auto Respawn'

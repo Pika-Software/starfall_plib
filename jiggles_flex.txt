@@ -12,7 +12,7 @@ local FULL_BODY = false
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local string = string
 local ipairs = ipairs
 local plib = plib

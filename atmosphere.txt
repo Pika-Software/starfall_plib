@@ -1,0 +1,62 @@
+--@name Atmosphere API
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@shared
+
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'Atmosphere API'
+atmosphere = atmosphere or {}
+
+if (SERVER) then
+
+    plib.ChatCommandAdd('atmosphere_from', function( ply, cmd, args, argStr )
+        if !plib.IsOwner( ply ) then return end
+        if istable( args ) and (#args > 0) then
+            net.start( chipName .. ' - AtmosphereToClient' )
+            net.writeTable( args )
+            net.send( ply )
+        end
+    end)
+
+    function atmosphere.Send( ... )
+        net.start( chipName .. ' - ServerToClient' )
+        net.writeTable( {...} )
+        net.send( plib.Owner )
+    end
+
+end
+
+if (CLIENT) then
+
+    local apiCommands = {}
+
+    function atmosphere.Set( name, func )
+        ArgAssert( name, 1, 'string' )
+        ArgAssert( func, 2, 'function' )
+        apiCommands[ name ] = func
+    end
+
+    function atmosphere.Run( name, ... )
+        ArgAssert( name, 1, 'string' )
+        local func = apiCommands[ name ]
+        if isfunction( func ) then
+            func( ... )
+        end
+    end
+
+    net.receive( chipName .. ' - AtmosphereToClient', function()
+        Run( unpack( net.readTable() ) )
+    end )
+
+    function atmosphere.Send( name, ... )
+        if !plib.PlayerIsOwner then return end
+        if isstring( name ) then
+            RunConsoleCommand( 'atmosphere_to', name, ... )
+        end
+    end
+
+    net.receive( chipName .. ' - ServerToClient', function()
+        Send( unpack( net.readTable() ) )
+    end )
+
+end

@@ -7,9 +7,9 @@
     Configuration
 -----------------]]--
 
-local DISTANCE = 256
+local DISTANCE = 512
 
-local MODEL = 'models/props_building_details/Storefront_Template001a_Bars.mdl' -- 'models/hunter/blocks/cube075x1x1.mdl'
+local MODEL = 'models/props_lab/blastdoor001c.mdl' -- 'models/hunter/blocks/cube075x1x1.mdl'
 
 local BLACKLIST = {
     ['lunasflightschool_missile'] = true,
@@ -24,7 +24,7 @@ local BLACKLIST = {
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Reflection'
 local find_inSphere = find.inSphere
 local timer_Simple = timer.Simple

@@ -32,7 +32,7 @@ local HIDE_CHAT_MESSAGES = true
          Code
 -----------------]]--
 
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - TTS'
 local ipairs = ipairs
 local table = table

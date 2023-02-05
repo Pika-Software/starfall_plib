@@ -19,7 +19,7 @@ local CHAT_COMMAND = '/ptp'
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local Vector = Vector
 local plib = plib
 

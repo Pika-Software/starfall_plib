@@ -11,7 +11,7 @@ local CHAT_COMMAND = '/ptpe'
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Entity Teleporter'
 local isValid = isValid
 local pcall = pcall

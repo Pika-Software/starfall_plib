@@ -1,0 +1,6 @@
+--@name
+--@author
+--@server
+
+local ply = entity(2)
+ply:applyDamage( ply:getHealth(), owner(), chip() )

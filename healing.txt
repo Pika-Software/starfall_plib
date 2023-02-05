@@ -20,7 +20,7 @@ local REMOVE_DELAY = 1
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local prop_spawnRate = prop.spawnRate
 local isValid = isValid
 local timer = timer

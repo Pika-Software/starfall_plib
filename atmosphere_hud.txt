@@ -1,0 +1,101 @@
+--@name Atmosphere HUD
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@client
+
+dofile( 'starfall_plib/atmosphere.txt' )
+local chipName = 'Atmosphere HUD'
+
+local ply = plib.Owner
+
+local health = 0
+local maxHealth = 0
+
+local armor = 0
+local maxArmor = 0
+
+local velocity = 0
+
+hook.add('think', chipName, function()
+    if (health ~= ply:getHealth()) then
+        health = ply:getHealth()
+        atmosphere.Send( 'health', health )
+    end
+
+    if (maxHealth ~= ply:getMaxHealth()) then
+        maxHealth = ply:getMaxHealth()
+        atmosphere.Send( 'maxHealth', maxHealth )
+    end
+
+    if (armor ~= ply:getArmor()) then
+        armor = ply:getArmor()
+        atmosphere.Send( 'armor', armor )
+    end
+
+    if (maxArmor ~= ply:getMaxArmor()) then
+        maxArmor = ply:getMaxArmor()
+        atmosphere.Send( 'maxArmor', maxArmor )
+    end
+
+    if (velocity ~= ply:getVelocity():getLength()) then
+        velocity = ply:getVelocity():getLength()
+        atmosphere.Send( 'velocity', math.floor( velocity ) )
+    end
+end)
+
+-- Require( 'client' )
+-- Require( 'sound' )
+
+-- health = health or 0
+-- client.Set( 'health', function( int )
+--     health = int
+-- end )
+
+-- maxHealth = maxHealth or 0
+-- client.Set( 'maxHealth', function( int )
+--     maxHealth = int
+-- end )
+
+-- armor = armor or 0
+-- maxArmor = maxArmor or 0
+
+-- client.Set( 'armor', function( int )
+--     armor = int
+-- end )
+
+-- client.Set( 'maxArmor', function( int )
+--     maxArmor = int
+-- end )
+
+-- local w, h = game.GetResolution()
+
+-- local x, y = 0, 0
+-- local hw, hh = 0, 0
+
+-- local function calc()
+--     hw, hh = ScreenPercentMin( 25 ), ScreenPercentMin( 2 )
+--     x, y = (w - hw) / 2, h - hh
+-- end
+
+-- hook.Add('ScreenResolutionChanged', 'AtmoHUD', function( newW, newH )
+--     w, h = newW, newH
+--     calc()
+-- end)
+
+-- calc()
+
+-- hook.Add('DrawOverlay', 'AtmoHUD', function()
+
+--     surface.SetDrawColor( 20, 20, 20, 200 )
+--     surface.DrawRect( x, y - hh - 10, hw, hh )
+
+--     surface.SetDrawColor( 255, 0, 0, 100 )
+--     surface.DrawRect( x + 1, y - hh + 1 - 10, hw * (health / maxHealth ) - 2, hh - 2 )
+
+--     surface.SetDrawColor( 20, 20, 20, 200 )
+--     surface.DrawRect( x, y - 5, hw, hh )
+
+--     surface.SetDrawColor( 0, 200, 255, 100 )
+--     surface.DrawRect( x + 1, y + 1 - 5, hw * (armor / maxArmor ) - 2, hh - 2 )
+
+-- end)

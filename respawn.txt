@@ -13,7 +13,7 @@ local DELAY = 1
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Respawn'
 local isValid = isValid
 local net = net

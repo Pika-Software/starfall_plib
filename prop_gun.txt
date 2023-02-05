@@ -25,7 +25,7 @@ local PROP_IGNITE = true
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Prop Gun'
 local timer_simple = timer.simple
 local isValid = isValid
@@ -37,11 +37,13 @@ hook.add('KeyPress', chipName, function(ply, key)
         if (ply[ chipName ] or 0) > CurTime() then return end
         ply[ chipName ] = CurTime() + 0.025
 
-        local pos = ply:localToWorld( Vector( 0, 0, ply:obbMaxs()[3] + 20 ) )
         local ang = ply:getEyeAngles()
         if ply:inVehicle() then
             ang[1] = ang[1] + 25
         end
+
+        local pos = ply:localToWorld( ang:getForward() * 10 )  + ply:getVelocity()
+
 
         local ok, ent = pcall( prop.create, pos, ang, PROP_MODEL )
         if (ok) then

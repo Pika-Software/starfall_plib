@@ -20,7 +20,7 @@ local TRANSLATE_LANGUAGE = 'pl'
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Chat Translator'
 local string = string
 local plib = plib

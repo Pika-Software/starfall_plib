@@ -11,7 +11,7 @@
 local CLIENT_DEATH_COLOR = Color( 250, 50, 50 )
 
 -- Friend Filter
-local CLIENT_IGNORE_FRIENDS = true
+local CLIENT_IGNORE_FRIENDS = false
 
 -- Update Time
 local CLIENT_UPDATE_TIME = 0.025
@@ -33,7 +33,7 @@ local SERVER_UPDATE_TIME = 1
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local ipairs = ipairs
 local table = table
 local plib = plib

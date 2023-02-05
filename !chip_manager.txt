@@ -3,22 +3,23 @@
 --@includedir starfall_plib
 --@shared
 
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 --[[-----------------
     Configuration
 -----------------]]--
 local CHIPS = {
     ['entity_teleporter'] = { SERVER, false },
     ['chat_translator'] = { SHARED, true },
+    ['atmosphere_hud'] = {CLIENT, false },
     ['jiggles_flex'] = { CLIENT, false },
     ['auto_respawn'] = { SERVER, false },
-    ['wall_watcher'] = { SHARED, false },
+    ['wall_watcher'] = { SHARED, true },
     ['anti_blind'] = { CLIENT, false },
     ['test_site'] = { SHARED, false },
-    ['reflection'] = { SERVER, false },
+    ['reflection'] = { SERVER, true },
     ['prop_gun'] = { SERVER, false },
-    ['healing'] = { SERVER, false },
-    ['respawn'] = { SHARED, false },
+    ['healing'] = { SERVER, true },
+    ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
     ['aimbot'] = { CLIENT, false },
     ['blink'] = { SERVER, true },
@@ -35,10 +36,10 @@ local plib = plib
 for fileName, data in pairs( CHIPS ) do
     if data[2] then
         if data[1] then
-            local ok, err = pcall( dofile, fileName .. '.lua' )
+            local ok, err = pcall( dofile, fileName .. '.txt' )
             plib.Log( 'Chip Manager', fileName .. ': ' .. ( ok and 'OK' or 'FAILED' ) )
             if ok then continue end
-            plib.Log( fileName .. '.lua', err )
+            plib.Log( fileName .. '.txt', err )
         end
     else
         plib.Log( 'Chip Manager', fileName .. ': ' .. 'OFF' )

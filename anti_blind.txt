@@ -6,7 +6,7 @@
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 if !plib.EnableHUD( true ) then return end
 
 local chipName = 'PLib - Anti-Blind'

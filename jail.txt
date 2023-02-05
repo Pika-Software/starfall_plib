@@ -1,0 +1,44 @@
+--@name Jail
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local CHAT_COMMAND = '/pjail'
+
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local model = 'models/props_building_details/Storefront_Template001a_Bars.mdl'
+local chipName = 'PLib - Jail'
+local pcall = pcall
+local plib = plib
+local hook = hook
+
+local cheater = nil
+plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
+    local plys = find.playersByName( nickName )
+    if (plys) then
+        local target = find.closest( plys, plib.Owner:getPos() )
+        if isValid( target ) then
+            cheater = target
+        end
+    end
+end)
+
+hook.add('think', chipName, function()
+    if IsValid( cheater ) then
+        local ok, ent = pcall( prop.create, plib.GetEntityCenterPos( cheater ), cheater:getAngles(), model, true )
+        if (ok) then
+            hook.remove( 'think', chipName )
+            hook.add( 'think', chipName, function()
+                ent:setAngles( cheater:getAngles() + Angle( 90, 0, 0 ) )
+                ent:setPos( cheater:getPos() )
+            end)
+        end
+    end
+end)

@@ -6,7 +6,7 @@
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Spawnpoint'
 local angOffset = Angle( 90 )
 local IsValid = IsValid

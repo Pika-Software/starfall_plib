@@ -12,7 +12,7 @@ local BIND = 262144
 
 -- Player Filters
 local IGNORE_SUPERADMINS = false
-local IGNORE_FRIENDS = true
+local IGNORE_FRIENDS = false
 local IGNORE_ADMINS = true
 local IGNORE_NOCLIP = true
 
@@ -26,7 +26,7 @@ local ONLY_VISIBLE_TARGET = true
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.lua' )
+dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Aimbot'
 local input_getCursorPos = input.getCursorPos
 local game_hasFocus = game.hasFocus
