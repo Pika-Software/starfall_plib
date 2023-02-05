@@ -1,0 +1,40 @@
+--@name Virus
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@shared
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'PLib - Virus'
+local plib = plib
+
+local color = Color( 20, 120, 20 )
+local chip = plib.Chip
+local radius = 0
+
+timer.create(chipName, 0.25, 0, function()
+    local pos = chip:getPos()
+    for _, ent in ipairs( find.inSphere( pos, radius ) ) do
+        if plib.IsChip( ent ) then continue end
+        if ent:isWeapon() then continue end
+        if !ent:isSolid() then continue end
+
+        local alpha = math.clamp( pos:getDistance( ent:getPos() ) / radius, 0, 1 )
+        if (alpha <= 0.5) then
+            if (SERVER) then
+                if ent:isPlayer() or ent:isNPC() then
+                    // plib.KillPlayer( ent )
+                    //print( 'kill', ent )
+                else
+                    pcall( ent.remove, ent )
+                end
+            end
+        else
+            pcall( ent.setColor, ent, Color( Lerp( alpha, 255, color.r ), Lerp( alpha, 255, color.g ), Lerp( alpha, 255, color.b ), 255 * alpha ) )
+        end
+    end
+
+    radius = radius + 1
+end)
