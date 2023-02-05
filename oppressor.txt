@@ -1,0 +1,144 @@
+--@name Oppressor
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local CHAT_COMMAND = '/pnpc'
+local DISTANCE = 10000
+
+--[[-----------------
+         Code
+-----------------]]--
+wire.adjustOutputs( {'Shoot'}, {'Number'} )
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'PLib - Oppressor'
+local angle_zero = plib.AngleZero
+local plib = plib
+
+local count = 0
+function createNav( startPos, ent )
+    count = count + 1
+    if count > 40 then return end
+
+    local forward = trace.line( startPos, startPos + Vector( DISTANCE, 0, 0 ), ent, 16395 )
+    local pos1 = worldToLocal( startPos, angle_zero, forward.HitPos, angle_zero )
+
+    local back = trace.line( startPos, startPos + Vector( -DISTANCE, 0, 0 ), ent, 16395 )
+    local pos2 = worldToLocal( startPos, angle_zero, back.HitPos, angle_zero )
+
+    local right = trace.line( startPos, startPos + Vector( 0, DISTANCE, 0 ), ent, 16395 )
+    local pos3 = worldToLocal( startPos, angle_zero, right.HitPos, angle_zero )
+
+    local left = trace.line( startPos, startPos + Vector( 0, -DISTANCE, 0 ), ent, 16395 )
+    local pos4 = worldToLocal( startPos, angle_zero, left.HitPos, angle_zero )
+
+    local down = trace.line( startPos, startPos - Vector( 0, 0, DISTANCE ), ent, 16395 )
+    local pos5 = worldToLocal( startPos, angle_zero, down.HitPos, angle_zero )
+
+    local mins, maxs = localToWorld( Vector( pos1[1], pos2[2], pos5[3] ), angle_zero, startPos, angle_zero ), localToWorld( Vector( pos3[1], pos4[2], pos5[3] ), angle_zero, startPos, angle_zero )
+
+    navmesh.createNavArea( mins, maxs )
+end
+
+createNav( plib.Chip:getPos() )
+
+local npcTarget = nil
+local targetHealth = 25
+
+-- /pnpc target Imper
+plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, args )
+    if !plib.IsOwner( ply ) then return end
+    local cmd = string.lower( args[1] )
+    if (cmd == 'target') then
+        local plys = find.playersByName( args[2] )
+        if (plys) then
+            local target = find.closest( plys, plib.Owner:getPos() )
+            if isValid( target ) then
+                npcTarget = target
+                plib.Log( chipName, 'New target is \'' .. target:getName() .. '\'' )
+                return
+            end
+        end
+    elseif (cmd == 'reset') then
+        npcTarget = nil
+        targetHealth = 25
+    elseif (cmd == 'kill') then
+        targetHealth = 0
+    end
+end)
+
+hook.add('think', chipName, function()
+    if nextbot.canSpawn() then
+        local ok, ent = pcall( nextbot.create, plib.Chip:getPos(), 'models/mossman.mdl' )
+        if ok then
+            hook.remove('think', chipName)
+
+            ent:setJumpGapsAllowed( true )
+            ent:setClimbAllowed( true )
+            ent:setMoveSpeed( 600 )
+
+            local wep = prop.createSent( ent:getPos(), ent:getAngles(), 'gmod_wire_turret' )
+            pcall( wep.setNoDraw, wep, true )
+            wep:setParent( ent )
+            wep:setCollisionGroup( 12 )
+            ent:setCollisionGroup( 12 )
+
+            wire.create( wep, plib.Chip, 'Fire', 'Shoot')
+
+            hook.add('think', chipName, function()
+                if isValid( npcTarget ) and npcTarget:isAlive() then
+                    local pos = ent:localToWorld( ent:obbCenter() )
+
+                    do
+                        local eyes = ent:lookupAttachment( 'eyes' )
+                        if (eyes > 0) then
+                            wep:setPos( ent:worldToLocal( ent:getAttachment( eyes ) ) )
+                        end
+                    end
+
+                    local headPos = nil
+
+                    do
+                        local eyes = npcTarget:lookupAttachment( 'eyes' )
+                        if (eyes > 0) then
+                            headPos = npcTarget:getAttachment( eyes )
+                        else
+                            headPos = npcTarget:localToWorld( npcTarget:obbCenter() )
+                        end
+                    end
+
+                    local dist = pos:getDistance( headPos )
+                    if (dist > 100) then
+                        if (dist > 500) then
+                            ent:setMoveSpeed( 1200 )
+                        else
+                            ent:setMoveSpeed( 600 )
+                        end
+
+                        ent:setGotoPos( npcTarget:getPos() )
+                    elseif ent:isSequenceFinished() then
+                        ent:playSequence( 'deathpose_front' )
+                    end
+
+                    local vec = npcTarget:localToWorld( npcTarget:obbCenter() ) - pos
+
+                    local ang = vec:getAngle()
+                    wep:setAngles( ang )
+
+                    local tr = trace.line( pos, pos + ang:getForward() * DISTANCE, {ent, wep} )
+                    if (tr.Entity == npcTarget) and (npcTarget:getHealth() > targetHealth) then
+                        wire.ports.Shoot = 1
+                    else
+                        wire.ports.Shoot = 0
+                    end
+                else
+                    wire.ports.Shoot = 0
+                end
+            end)
+        end
+    end
+end)
+
