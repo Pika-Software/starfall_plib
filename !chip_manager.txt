@@ -18,12 +18,12 @@ local CHIPS = {
     ['test_site'] = { SHARED, false },
     ['reflection'] = { SERVER, true },
     ['prop_gun'] = { SERVER, false },
-    ['healing'] = { SERVER, true },
-    ['respawn'] = { SHARED, true },
+    ['healing'] = { SERVER, false },
+    ['respawn'] = { SHARED, false },
     ['shield'] = { SERVER, false },
     ['aimbot'] = { CLIENT, false },
     ['blink'] = { SERVER, true },
-    ['tts'] = { SHARED, true }
+    ['tts'] = { SHARED, false }
 }
 
 --[[-----------------
