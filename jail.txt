@@ -7,7 +7,7 @@
     Configuration
 -----------------]]--
 local CHAT_COMMAND = '/pjail'
-
+local LOCK_TARGET = false
 
 --[[-----------------
          Code
@@ -19,26 +19,76 @@ local pcall = pcall
 local plib = plib
 local hook = hook
 
-local cheater = nil
-plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
+local ply = nil
+plib.ChatCommandAdd(CHAT_COMMAND, function( pl, _, __, nickName )
+    if !plib.IsOwner( pl ) then return end
     local plys = find.playersByName( nickName )
     if (plys) then
-        local target = find.closest( plys, plib.Owner:getPos() )
+        local target = find.closest( plys, pl:getPos() )
         if isValid( target ) then
-            cheater = target
+            ply = target
+            plib.Log( chipName, 'Jailed: ' .. target:getName() )
         end
     end
 end)
 
+local walls = {
+    {
+        ['Pos'] = Vector( 0, 0, -1 ),
+        ['Ang'] = Angle( 90, 0, 0 )
+    },
+    {
+        ['Pos'] = Vector( 0, 0, 50 * 2 + 1 ),
+        ['Ang'] = Angle( 90, 0, 0 )
+    },
+    {
+        ['Pos'] = Vector( 51, 0, 50 ),
+        ['Ang'] = Angle( 0, 0, 0 )
+    },
+    {
+        ['Pos'] = Vector( -51, 0, 50 ),
+        ['Ang'] = Angle( 0, 180, 0 )
+    },
+    {
+        ['Pos'] = Vector( 0, -30, 29 ),
+        ['Ang'] = Angle( 180, 90, 90 )
+    },
+    {
+        ['Pos'] = Vector( 0, 30, 29 ),
+        ['Ang'] = Angle( 180, -90, 90 )
+    },
+    {
+        ['Pos'] = Vector( 0, -30, 71 ),
+        ['Ang'] = Angle( 180, 90, 90 )
+    },
+    {
+        ['Pos'] = Vector( 0, 30, 71 ),
+        ['Ang'] = Angle( 180, -90, 90 )
+    },
+}
+
+if !LOCK_TARGET then
+    for _, wall in ipairs( walls ) do
+        wall.Pos[3] = wall.Pos[3] - 1
+    end
+end
+
 hook.add('think', chipName, function()
-    if IsValid( cheater ) then
-        local ok, ent = pcall( prop.create, plib.GetEntityCenterPos( cheater ), cheater:getAngles(), model, true )
-        if (ok) then
-            hook.remove( 'think', chipName )
-            hook.add( 'think', chipName, function()
-                ent:setAngles( cheater:getAngles() + Angle( 90, 0, 0 ) )
-                ent:setPos( cheater:getPos() )
-            end)
+    if IsValid( ply ) and ply:isAlive() then
+        for _, tbl in ipairs( walls ) do
+            local fence = tbl.Entity
+            if IsValid( fence ) then
+                fence:setAngles( ply:getAngles() + tbl.Ang )
+                fence:setPos( ply:localToWorld( tbl.Pos ) )
+                continue
+            end
+
+            if prop.canSpawn() then
+                local ok, ent = pcall( prop.create, ply:localToWorld( tbl.Pos ), ply:getAngles() + tbl.Ang, model, true )
+                if (ok) then
+                    tbl.Entity = ent
+                end
+            end
         end
     end
 end)
