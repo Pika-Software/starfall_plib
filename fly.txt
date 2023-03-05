@@ -6,6 +6,7 @@
 --[[-----------------
          Code
 -----------------]]--
+dofile( 'starfall_plib/init.txt' )
 local model = 'models/props_building_details/Storefront_Template001a_Bars.mdl'
 local offset = { Vector( 0, 0, -1.25 ), Angle( 90, 0, 0 ) }
 local chipName = '"Fly"'
