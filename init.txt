@@ -420,6 +420,10 @@ function plib.KillOwner()
     RunConsoleCommand( 'kill' )
 end
 
+function plib.KillPlayer( ply, attacker, inflictor )
+    return pcall( ply.applyDamage, ply, ply:getHealth(), attacker or ply, inflictor or ply )
+end
+
 do
 
     local trace = trace

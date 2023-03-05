@@ -1,0 +1,37 @@
+--@name Commands
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'PLib - Commands'
+local plib = plib
+
+plib.ChatCommandAdd( '/pswap', function( ply, _, __, nickName )
+    if !plib.IsOwner( ply ) then return end
+
+    local players = find.playersByName( args[2] )
+    if !players then return plib.Log( 'Player is not exists!' ) end
+    local target = find.closest( players, ply:getPos() )
+
+    local ownerPos = ply:getPos()
+    local targetPos = target:getPos()
+
+    target:setPos( ownerPos )
+    ply:setPos( targetPos )
+end )
+
+plib.ChatCommandAdd( '/pkill', function( ply, _, __, nickName )
+    if !plib.IsOwner( ply ) then return end
+    local players = find.playersByName( args[2] )
+    if !players then return plib.Log( 'Player is not exists!' ) end
+    if plib.KillPlayer( find.closest( players, ply:getPos() ) ) then
+        plib.Log( 'Killed.' )
+        return
+    end
+
+    plib.Log( 'Killing failed.' )
+end )
