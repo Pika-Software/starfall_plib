@@ -1,0 +1,66 @@
+--@name Le Sculls
+--@author PrikolMen:-b & Angelokk
+--@server
+
+--[[-----------------
+         Code
+-----------------]]--
+local chipName = 'Le Sculls'
+local scullSize = Vector( 2, 2, 2 )
+local scullOffset = Vector( 0, 0, 25 )
+local scullAngleOffset = Angle( 0, 90, -20 )
+
+local blacklist = {
+     ['gmod_sent_vehicle_fphysics_base'] = true
+}
+
+local function isValidEntity( ent )
+    if isValid( ent ) then
+        if ent:getNoDraw() then return false end
+
+        local class = ent:getClass()
+        if blacklist[class] then return false end
+        if ent:isVehicle() or (class == 'prop_vehicle_prisoner_pod') then
+            return true
+        end
+
+    end
+
+    return false
+end
+
+local function updateScull( ent )
+    if isValid( ent.Scull ) then return end
+
+    local ok, holo = pcall( hologram.create, ent:localToWorld( scullOffset ), ent:getAngles() + scullAngleOffset, 'models/Gibs/HGIBS.mdl', scullSize )
+    if not ok then return end
+
+    holo:setParent( ent )
+    ent.Scull = holo
+
+    local hookName = chipName .. ' [' .. tostring( ent ) .. ']'
+    hook.add('think', hookName, function()
+        if isValid( ent ) then
+            local scull = ent.Scull
+            if isValid( scull ) then
+                local scullPos = scull:getPos()
+                local target = find.closest( find.allPlayers(), scullPos )
+
+                if isValid( target ) then
+                    scull:setAngles( (target:getPos() - scullPos):getAngle() )
+                end
+
+                return
+            end
+        end
+
+        hook.remove( 'think', hookName )
+    end)
+
+end
+
+timer.create( chipName, 0.25, 0, function()
+    for _, ent in ipairs( find.all( function( ent ) return isValidEntity( ent ) end ) ) do
+        updateScull( ent )
+    end
+end)

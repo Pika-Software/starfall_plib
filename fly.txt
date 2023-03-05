@@ -1,0 +1,34 @@
+--@name "Fly"
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+         Code
+-----------------]]--
+local model = 'models/props_building_details/Storefront_Template001a_Bars.mdl'
+local offset = { Vector( 0, 0, -1.25 ), Angle( 90, 0, 0 ) }
+local chipName = '"Fly"'
+local isValid = isValid
+local pcall = pcall
+local prop = prop
+local plib = plib
+
+local fence = nil
+hook.add('tick', chipName, function()
+    if isValid( plib.Owner ) and plib.Owner:isAlive() then
+        if isValid( fence ) then
+            fence:setAngles( plib.Owner:getAngles() + offset[2] )
+            fence:setPos( plib.Owner:localToWorld( offset[1] ) )
+            return
+        end
+
+        if prop.canSpawn() then
+            local ok, ent = pcall( prop.create, plib.Owner:localToWorld( offset[1] ), plib.Owner:getAngles() + offset[2], model, true )
+            if (ok) then
+                ent:setNoDraw( true )
+                fence = ent
+            end
+        end
+    end
+end)

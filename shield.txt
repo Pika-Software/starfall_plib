@@ -12,15 +12,18 @@ local pcall = pcall
 local plib = plib
 local hook = hook
 
+local shield = nil
 hook.add('think', chipName, function()
+    if isValid( shield ) then
+        shield:setNoDraw( true )
+        shield:setCollisionGroup( 11 )
+        shield:setAngles( plib.Owner:getAngles() )
+        shield:setPos( plib.GetEntityCenterPos( plib.Owner ) )
+        return
+    end
+
     local ok, ent = pcall( prop.create, plib.GetEntityCenterPos( plib.Owner ), plib.Owner:getAngles(), 'models/hunter/blocks/cube6x6x6.mdl', true )
     if (ok) then
-        hook.remove( 'think', chipName )
-        hook.add( 'think', chipName, function()
-            ent:setNoDraw( true )
-            ent:setCollisionGroup( 11 )
-            ent:setAngles( plib.Owner:getAngles() )
-            ent:setPos( plib.GetEntityCenterPos( plib.Owner ) )
-        end)
+        shield = ent
     end
 end)

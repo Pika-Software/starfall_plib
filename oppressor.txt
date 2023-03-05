@@ -62,11 +62,16 @@ plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, args )
                 return
             end
         end
+    elseif (cmd == 'health') then
+        targetHealth = tonumber( args[2] )
+        plib.Log( chipName, 'Now target health is \'' .. targetHealth .. '\'' )
     elseif (cmd == 'reset') then
         npcTarget = nil
         targetHealth = 25
+        plib.Log( chipName, 'Waiting...' )
     elseif (cmd == 'kill') then
         targetHealth = 0
+        plib.Log( chipName, 'Now target health is \'' .. targetHealth .. '\'' )
     end
 end)
 
