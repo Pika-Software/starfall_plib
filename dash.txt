@@ -1,0 +1,65 @@
+--@name Dash
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+
+local PRESS_DELAY = 0.25
+local FORCE = 512
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local plib = plib
+
+local directions = {
+    -- Jump
+    [2] = function( ang, ply )
+        return ang:getUp()    
+    end,
+    -- Ctrl
+    [4] = function( ang, ply )
+        if ply:isOnGround() then return end
+        ply:setVelocity( -ply:getVelocity() )
+        return -ang:getUp() * 2
+    end,
+    -- W
+    [8] = function( ang )
+        return ang:getForward() * 2
+    end,
+    -- A
+    [512] = function( ang )
+        return -ang:getRight() 
+    end,
+    -- S
+    [16] = function( ang )
+        return -ang:getForward()
+    end,
+    -- D
+    [1024] = function( ang )
+        return ang:getRight() 
+    end
+}
+
+local dashes = {}
+
+hook.add( "KeyPress", "Dash - Key Capture", function( ply, key )
+    if not plib.IsOwner( ply ) then return end
+
+    local func = directions[ key ]
+    if not func then return end
+    
+    local time = CurTime()
+    local nextDash = dashes[ key ]
+    if nextDash and nextDash > time then return end
+    dashes[ key ] = time + PRESS_DELAY
+
+    local dir = func( ply:getAngles(), ply )
+    if not dir then return end
+
+    ply:setVelocity( dir * FORCE )
+end )
