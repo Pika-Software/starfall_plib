@@ -65,9 +65,8 @@ hook.Add('think', chipName, function()
                 new:setNoDraw( true )
 
                 timer_Simple(0.25, function()
-                    if IsValid( new ) then
-                        new:remove()
-                    end
+                    if not IsValid( new ) then return end
+                    pcall( new.remove, new )
                 end)
             end
         end

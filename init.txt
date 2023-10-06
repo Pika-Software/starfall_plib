@@ -50,11 +50,11 @@ do
         ArgAssert( cmd, 1, 'string' )
         local args = {...}
         if (#args > 0) then
-            concmd( cmd .. ' "' .. table.concat( args, '" "' ) .. '"' )
+            pcall( concmd, cmd .. ' "' .. table.concat( args, '" "' ) .. '"' )
             return
         end
 
-        concmd( cmd )
+        pcall( concmd, cmd )
     end
 end
 

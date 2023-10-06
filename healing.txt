@@ -51,9 +51,8 @@ hook.add('EntityTakeDamage', chipName, function( ply )
                                 end
 
                                 timer.simple(REMOVE_DELAY, function()
-                                    if isValid( ent ) then
-                                        ent:remove()
-                                    end
+                                    if not isValid( ent ) then return end
+                                    pcall( ent.remove, ent )
                                 end)
                             end
 
@@ -79,9 +78,8 @@ hook.add('EntityTakeDamage', chipName, function( ply )
                                 end
 
                                 timer.simple(REMOVE_DELAY, function()
-                                    if isValid( ent ) then
-                                        ent:remove()
-                                    end
+                                    if not isValid( ent ) then return end
+                                    pcall( ent.remove, ent )
                                 end)
                             end
 
