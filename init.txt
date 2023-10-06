@@ -433,3 +433,42 @@ do
     end
 
 end
+
+--[[-----------------
+    Configuration
+-----------------]]--
+
+local HEALTH_CLASS = 'item_healthkit'
+local HEALTH_USE = false
+
+local ARMOR_CLASS = 'item_battery'
+local ARMOR_USE = false
+
+local REMOVE_DELAY = 1
+
+function plib.Heal( ply )
+    local ent = plib.CreateEntity( HEALTH_CLASS, HEALTH_USE and plib.Chip:getPos() or ply:getPos(), plib.AngleZero, false )
+    if !isValid( ent ) then return end
+    if HEALTH_USE then
+        ent:use()
+    end
+
+    timer.simple( REMOVE_DELAY, function()
+        if !isValid( ent ) then return end
+        pcall( ent.remove, ent )
+    end )
+end
+
+function plib.GiveArmor( ply )
+    local ent = plib.CreateEntity( ARMOR_CLASS, ARMOR_USE and plib.Chip:getPos() or ply:getPos(), plib.AngleZero, false )
+    if !isValid( ent ) then return end
+
+    if ARMOR_USE then
+        ent:use()
+    end
+
+    timer.simple( REMOVE_DELAY, function()
+        if !isValid( ent ) then return end
+        pcall( ent.remove, ent )
+    end )
+end

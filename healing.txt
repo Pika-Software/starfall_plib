@@ -6,16 +6,8 @@
 --[[-----------------
     Configuration
 -----------------]]--
-
 local HEALTH_GIVE = true
-local HEALTH_CLASS = 'item_healthkit'
-local HEALTH_USE = false
-
 local ARMOR_GIVE = true
-local ARMOR_CLASS = 'item_battery'
-local ARMOR_USE = false
-
-local REMOVE_DELAY = 1
 
 --[[-----------------
          Code
@@ -32,64 +24,40 @@ local chipName = 'PLib - Healing'
 local healthHookName = chipName .. ' / HEALTH'
 local armorHookName = chipName .. ' / ARMOR'
 
-hook.add('EntityTakeDamage', chipName, function( ply )
+hook.add( 'EntityTakeDamage', chipName, function( ply )
     if plib.IsOwner( ply ) and ply:isAlive() then
-        timer.simple(0, function()
-            if isValid( ply ) and ply:isAlive() then
-                if HEALTH_GIVE then
-                    local nextHealthSpawnTime = 0
-                    hook.add('think', healthHookName, function()
-                        if nextHealthSpawnTime > timer.curtime() then return end
-                        nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
+        timer.simple( 0, function()
+            if not isValid( ply ) or not ply:isAlive() then return end
 
-                        if isValid( ply ) and ply:isAlive() and (ply:getHealth() < ply:getMaxHealth()) then
-                            local pos = HEALTH_USE and plib.Chip:getPos() or ply:getPos()
-                            local ent = plib.CreateEntity( HEALTH_CLASS, pos, plib.AngleZero, false )
-                            if isValid( ent ) then
-                                if HEALTH_USE then
-                                    ent:use()
-                                end
+            if HEALTH_GIVE then
+                local nextHealthSpawnTime = 0
+                hook.add( 'think', healthHookName, function()
+                    if nextHealthSpawnTime > timer.curtime() then return end
+                    nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
-                                timer.simple(REMOVE_DELAY, function()
-                                    if not isValid( ent ) then return end
-                                    pcall( ent.remove, ent )
-                                end)
-                            end
+                    if isValid( ply ) and ply:isAlive() and ply:getHealth() < ply:getMaxHealth() then
+                        plib.HealOwner( ply )
+                        return
+                    end
 
-                            return
-                        end
-
-                        hook.remove('think', healthHookName)
-                    end)
-                end
-
-                if ARMOR_GIVE then
-                    local nextArmorSpawnTime = 0
-                    hook.add('think', armorHookName, function()
-                        if nextArmorSpawnTime > timer.curtime() then return end
-                        nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
-
-                        if isValid( ply ) and ply:isAlive() and (ply:getArmor() < ply:getMaxArmor()) then
-                            local pos = ARMOR_USE and plib.Chip:getPos() or ply:getPos()
-                            local ent = plib.CreateEntity( ARMOR_CLASS, pos, plib.AngleZero, false )
-                            if isValid( ent ) then
-                                if ARMOR_USE then
-                                    ent:use()
-                                end
-
-                                timer.simple(REMOVE_DELAY, function()
-                                    if not isValid( ent ) then return end
-                                    pcall( ent.remove, ent )
-                                end)
-                            end
-
-                            return
-                        end
-
-                        hook.remove('think', armorHookName)
-                    end)
-                end
+                    hook.remove( 'think', healthHookName )
+                end )
             end
-        end)
+
+            if ARMOR_GIVE then
+                local nextArmorSpawnTime = 0
+                hook.add( 'think', armorHookName, function()
+                    if nextArmorSpawnTime > timer.curtime() then return end
+                    nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
+
+                    if isValid( ply ) and ply:isAlive() and ply:getArmor() < ply:getMaxArmor() then
+                        plib.GiveArmorToOwner( ply )
+                        return
+                    end
+
+                    hook.remove( 'think', armorHookName )
+                end )
+            end
+        end )
     end
-end)
+end )

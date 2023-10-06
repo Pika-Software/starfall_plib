@@ -1,0 +1,30 @@
+--@name Blood is fuel
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+
+DISTANCE = 128
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local plib = plib
+
+hook.add( "EntityTakeDamage", "Blood is fuel", function( ent, _, _, _, _, position )
+    if plib.IsOwner( ent ) then return end
+
+    local owner = plib.Owner
+    if not owner:isAlive() then return end
+    if owner:getPos():getDistance( position ) > DISTANCE then return end
+
+    if owner:getHealth() < owner:getMaxHealth() then
+        plib.Heal( owner )
+    elseif owner:getArmor() < owner:getMaxArmor() then
+        plib.GiveArmor( owner )
+    end
+end )
