@@ -7,7 +7,7 @@
     Configuration
 -----------------]]--
 local ONLY_OWNER = true
-local FULL_BODY = false
+local FULL_BODY = true
 
 --[[-----------------
          Code

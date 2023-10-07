@@ -26,6 +26,10 @@ local armorHookName = chipName .. ' / ARMOR'
 
 hook.add( 'EntityTakeDamage', chipName, function( ply )
     if plib.IsOwner( ply ) and ply:isAlive() then
+        if ply:isOnFire() then
+            pcall( ply.extinguish, ply )
+        end
+
         timer.simple( 0, function()
             if not isValid( ply ) or not ply:isAlive() then return end
 

@@ -8,24 +8,19 @@
 -----------------]]--
 
 local PRESS_DELAY = 0.25
+local DELAY = 0.2
 local FORCE = 512
 
 --[[-----------------
          Code
 -----------------]]--
-dofile( 'starfall_plib/init.txt' )
+dofile( "starfall_plib/init.txt" )
 local plib = plib
 
 local directions = {
     -- Jump
     [2] = function( ang, ply )
-        return ang:getUp()    
-    end,
-    -- Ctrl
-    [4] = function( ang, ply )
-        if ply:isOnGround() then return end
-        ply:setVelocity( -ply:getVelocity() )
-        return -ang:getUp() * 2
+        return ang:getUp()
     end,
     -- W
     [8] = function( ang )
@@ -33,7 +28,7 @@ local directions = {
     end,
     -- A
     [512] = function( ang )
-        return -ang:getRight() 
+        return -ang:getRight()
     end,
     -- S
     [16] = function( ang )
@@ -41,22 +36,34 @@ local directions = {
     end,
     -- D
     [1024] = function( ang )
-        return ang:getRight() 
+        return ang:getRight()
     end
 }
 
+local delays = {}
 local dashes = {}
 
 hook.add( "KeyPress", "Dash - Key Capture", function( ply, key )
     if not plib.IsOwner( ply ) then return end
 
+    if key == 4 and not ply:isOnGround() then
+        ply:setVelocity( -ply:getVelocity() - ply:getAngles():getUp() * 2 * FORCE )
+        return
+    end
+
     local func = directions[ key ]
     if not func then return end
-    
+
     local time = CurTime()
-    local nextDash = dashes[ key ]
+
+    local lastDash = dashes[ key ]
+    dashes[ key ] = time
+
+    if not lastDash or ( time - lastDash ) > PRESS_DELAY then return end
+
+    local nextDash = delays[ key ]
     if nextDash and nextDash > time then return end
-    dashes[ key ] = time + PRESS_DELAY
+    delays[ key ] = time + DELAY
 
     local dir = func( ply:getAngles(), ply )
     if not dir then return end
