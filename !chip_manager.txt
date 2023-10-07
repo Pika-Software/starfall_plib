@@ -9,7 +9,7 @@ dofile( 'starfall_plib/init.txt' )
 -----------------]]--
 local CHIPS = {
     ['entity_teleporter'] = { SERVER, true },
-    ['chat_translator'] = { SHARED, true },
+    ['chat_translator'] = { SHARED, false },
     ['atmosphere_hud'] = {CLIENT, false },
     ['jiggles_flex'] = { CLIENT, false },
     ['auto_respawn'] = { SERVER, true },
@@ -18,7 +18,7 @@ local CHIPS = {
     ['test_site'] = { SHARED, false },
     ['reflection'] = { SERVER, false },
     ['prop_gun'] = { SERVER, false },
-    ['healing'] = { SERVER, false },
+    ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
     ['aimbot'] = { CLIENT, false },
@@ -26,8 +26,8 @@ local CHIPS = {
     ['tts'] = { SHARED, false },
 
     -- Ultrakill
-    ['blood_is_fuel'] = { SERVER, true },
-    ['dash'] = { SERVER, false }
+    ['blood_is_fuel'] = { SERVER, false },
+    ['dash'] = { SERVER, true }
 }
 
 --[[-----------------

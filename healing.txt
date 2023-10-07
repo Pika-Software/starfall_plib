@@ -36,7 +36,7 @@ hook.add( 'EntityTakeDamage', chipName, function( ply )
                     nextHealthSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
                     if isValid( ply ) and ply:isAlive() and ply:getHealth() < ply:getMaxHealth() then
-                        plib.HealOwner( ply )
+                        plib.Heal( ply )
                         return
                     end
 
@@ -51,7 +51,7 @@ hook.add( 'EntityTakeDamage', chipName, function( ply )
                     nextArmorSpawnTime = timer.curtime() + (1 / prop_spawnRate()) + math.rand( 0, 2 )
 
                     if isValid( ply ) and ply:isAlive() and ply:getArmor() < ply:getMaxArmor() then
-                        plib.GiveArmorToOwner( ply )
+                        plib.GiveArmor( ply )
                         return
                     end
 

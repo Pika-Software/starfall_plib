@@ -21,7 +21,7 @@ local SERVER_IGNORE_SUPERADMINS = false
 local SERVER_IGNORE_ADMINS = false
 local SERVER_IGNORE_NOCLIP = false
 local SERVER_IGNORE_DEAD = true
-local SERVER_IGNORE_GOD = true
+local SERVER_IGNORE_GOD = false
 
 -- CFC Starfall Ext
 local SERVER_IGNORE_BUILDERS = true
