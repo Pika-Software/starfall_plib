@@ -8,13 +8,13 @@
 -----------------]]--
 
 -- Audio volume in %
-local VOLUME = 100
+local VOLUME = 1000
 
 -- TTS hear distantion in hammer units
 local HEAR_DIST = 1024
 
 -- All chat messages will be converted to tts
-local AUTO_TTS = false
+local AUTO_TTS = true
 
 -- TTS by chat command
 local CHAT_COMMAND = '/ptts'
@@ -26,7 +26,7 @@ local DEAD_CANT_TALK = true
 local DEAD_CANT_HEAR = true
 
 -- Hide messages in chat
-local HIDE_CHAT_MESSAGES = true
+local HIDE_CHAT_MESSAGES = false
 
 --[[-----------------
          Code
@@ -35,68 +35,72 @@ local HIDE_CHAT_MESSAGES = true
 dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - TTS'
 local ipairs = ipairs
-local table = table
 local plib = plib
 local hook = hook
 local net = net
 
 if (CLIENT) then
 
-    local phrases = {}
+    local plib_GetEntityCenterPos = plib.GetEntityCenterPos
+    local isValid = isValid
+    local audioChannel = nil
 
     net.receive( chipName, function()
         local ply = net.readEntity()
-        if !isValid( ply ) then return end
+        if !isValid( ply ) then
+            return
+        end
+
         plib.PlayTTS(net.readString(), '3d', function( channel )
-            table.insert( phrases, channel )
-            channel:setPos( plib.GetEntityCenterPos( ply ) )
+            if isValid( audioChannel ) then
+                audioChannel:stop()
+            end
+
+            audioChannel = channel
+            channel:setPos( plib_GetEntityCenterPos( ply ) )
             channel:setFade( 200, HEAR_DIST * 2 )
             channel:setVolume( VOLUME / 100 )
             channel:play()
-        end)
-    end)
+        end )
+    end )
 
     local localPlayer = plib.Player
     local owner = plib.Owner
 
-    hook.add('think', chipName, function()
-        if isValid( owner ) then
-            for num, channel in ipairs( phrases ) do
-                if isValid( channel ) then
-                    if ( !DEAD_CANT_TALK or owner:isAlive() ) then
-                        if ( !DEAD_CANT_HEAR or localPlayer:isAlive() ) then
-                            channel:setPos( plib.GetEntityCenterPos( owner ) )
-                            channel:setVolume( VOLUME / 100 )
-                        else
-                            channel:setVolume( 0 )
-                        end
-                    else
-                        table.remove( phrases, num )
-                        channel:stop()
-                        break
-                    end
-                else
-                    table.remove( phrases, num )
-                    break
-                end
+    hook.add( 'think', chipName, function()
+        if !isValid( owner ) then
+            hook.remove( 'think', chipName )
+            return
+        end
+
+        if !isValid( audioChannel ) then
+            return
+        end
+
+        if ( !DEAD_CANT_TALK or owner:isAlive() ) then
+            if ( !DEAD_CANT_HEAR or localPlayer:isAlive() ) then
+                audioChannel:setPos( plib.GetEntityCenterPos( owner ) )
+                audioChannel:setVolume( VOLUME / 100 )
+            else
+                audioChannel:setVolume( 0 )
             end
         else
-            hook.remove( 'think', chipName )
+            audioChannel:stop()
         end
-    end)
+    end )
 
 end
 
 if (SERVER) then
 
-    local find = find
+    local find_inSphere = find.inSphere
 
-    function TTS( ply, text, isTeam )
+    local function tts( ply, text, isTeam )
         local whoHear = {}
         local playerTeam = ply:getTeam()
-        for _, pl in ipairs( find.inSphere( ply:getEyePos(), HEAR_DIST ) ) do
-            if pl:isPlayer() and ( !DEAD_CANT_HEAR or ply:isAlive()) and (!isTeam or pl:getTeam() == playerTeam) then
-                table.insert( whoHear, pl )
+        for _, pl in ipairs( find_inSphere( ply:getEyePos(), HEAR_DIST ) ) do
+            if pl:isPlayer() and ( !DEAD_CANT_HEAR or ply:isAlive() ) and ( !isTeam or pl:getTeam() == playerTeam ) then
+                whoHear[ #whoHear + 1 ] = pl
             end
         end
 
@@ -110,18 +114,18 @@ if (SERVER) then
         end
     end
 
-    hook.add('PostPlayerSay', chipName, function( ply, text, isTeam )
+    hook.add( 'PostPlayerSay', chipName, function( ply, text, isTeam )
         if !plib.IsOwner( ply ) then return end
         if !AUTO_TTS or string.startWith( text, '/' ) then
             return
         end
 
-        return TTS( ply, text, isTeam )
-    end)
+        return tts( ply, text, isTeam )
+    end )
 
-    plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, text, isTeam )
+    plib.ChatCommandAdd( CHAT_COMMAND, function( ply, _, __, text, isTeam )
         if !plib.IsOwner( ply ) then return end
-        TTS( ply, text, isTeam )
-    end)
+        tts( ply, text, isTeam )
+    end )
 
 end
