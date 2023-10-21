@@ -104,10 +104,12 @@ if (SERVER) then
             end
         end
 
-        net.start( chipName )
-            net.writeEntity( ply )
-            net.writeString( text )
-        net.send( whoHear )
+        if #whoHear > 0 then
+            net.start( chipName )
+                net.writeEntity( ply )
+                net.writeString( text )
+            net.send( whoHear )
+        end
 
         if HIDE_CHAT_MESSAGES then
             return ''
