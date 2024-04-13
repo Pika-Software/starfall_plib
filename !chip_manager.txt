@@ -9,6 +9,7 @@ dofile( 'starfall_plib/init.txt' )
 -----------------]]--
 local CHIPS = {
     ['entity_teleporter'] = { SERVER, true },
+    ['flight-animation'] = { CLIENT, true },
     ['chat_translator'] = { SHARED, false },
     ['atmosphere_hud'] = {CLIENT, false },
     ['jiggles_flex'] = { CLIENT, false },
