@@ -1,0 +1,76 @@
+--@name Flight Animation
+--@author Unknown Developer
+--@client
+
+local chipName = "Flight Animation"
+
+-- [[ CONFIG ]] --
+local alwaysOn = false
+local useMagic = false
+local onGroundCheck = false
+local minimalSpeed = 64
+
+-- [[ CODE ]] --
+local owner = owner()
+owner:resetAnimation()
+
+local allowedSequences = {}
+for key, value in pairs( owner:getSequenceList() ) do
+    if not value:find( "swim" ) then continue end
+    allowedSequences[ value ] = true
+end
+
+-- https://wiki.facepunch.com/gmod/Enums/MOVETYPE
+local moveTypes = {
+    [ 4 ] = true,
+    [ 5 ] = true,
+    [ 8 ] = true
+}
+
+local holdTypes = {
+    [ "normal" ] = useMagic and "magic" or "passive",
+    [ "physgun" ] = "gravgun",
+    [ "smg" ] = "smg1"
+}
+
+local lastHoldType = nil
+
+hook.add( "think", chipName, function()
+    if not ( owner:isAlive() and ( alwaysOn or ( onGroundCheck and not owner:isOnGround() ) or moveTypes[ owner:getMoveType() ] ) ) then
+        if owner:isPlayingAnimation() then
+            owner:resetAnimation()
+        end
+
+        return
+    end
+
+    local weapon, holdType = owner:getActiveWeapon(), "normal"
+    if weapon and weapon:isValid() then
+        holdType = weapon:getHoldType() or "normal"
+    end
+
+    if owner:isPlayingAnimation() and holdType == lastHoldType then
+        if owner:getVelocity():getLength2D() > minimalSpeed then
+            owner:setAnimationRate( 0 )
+        else
+            owner:setAnimationRate( 0.25 )
+        end
+
+        return
+    end
+
+    lastHoldType = holdType
+
+    local sequenceName = "swimming_" .. ( holdTypes[ holdType ] or holdType )
+    if not allowedSequences[ sequenceName ] then
+        sequenceName = "swimming_" .. holdTypes.normal
+    end
+
+    owner:setAnimation( sequenceName, owner:getAnimationProgress() or 0, 0, true, true )
+end )
+
+hook.add( "Removed", chipName, function()
+    if owner:isValid() then
+        owner:resetAnimation()
+    end
+end )
