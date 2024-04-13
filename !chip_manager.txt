@@ -21,13 +21,12 @@ local CHIPS = {
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
-    ['aimbot'] = { CLIENT, false },
     ['blink'] = { SERVER, true },
-    ['tts'] = { SHARED, false },
+    ['tts'] = { SHARED, true },
 
     -- Ultrakill
     ['blood_is_fuel'] = { SERVER, false },
-    ['dash'] = { SERVER, true }
+    ['dash'] = { SERVER, false }
 }
 
 --[[-----------------
