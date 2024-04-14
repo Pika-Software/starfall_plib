@@ -19,6 +19,11 @@ hook.add('think', chipName, function()
         shield:setCollisionGroup( 11 )
         shield:setAngles( plib.Owner:getAngles() )
         shield:setPos( plib.GetEntityCenterPos( plib.Owner ) )
+
+        if shield:isOnFire() then
+            shield:extinguish()
+        end
+
         return
     end
 
