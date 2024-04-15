@@ -69,6 +69,16 @@ hook.add( "think", chipName, function()
     owner:setAnimation( sequenceName, owner:getAnimationProgress() or 0, 0, true, true )
 end )
 
+local find = string.find
+
+hook.add( "EntityEmitSound", chipName, function( data )
+    if data.Entity == owner and owner:isPlayingAnimation() then
+        if find( data.SoundName, "player/footsteps/.+" ) then
+            return false
+        end
+    end
+end )
+
 hook.add( "Removed", chipName, function()
     if owner:isValid() then
         owner:resetAnimation()
