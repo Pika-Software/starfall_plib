@@ -1,0 +1,134 @@
+--@name Flight
+--@author Unknown Developer
+--@shared
+
+local chipName = "Flight"
+local owner = owner()
+local chip = chip()
+
+if CLIENT then
+    enableHud( owner, true )
+    return
+end
+
+-- [[ Config ]] --
+local speedX, speedY, speedZ = 128, 256, 64
+local shiftMultiplier = 3
+
+-- [[ CODE ]] --
+local spawnOffset = Vector( 0, 0, 16 )
+local keys = {}
+local entity
+
+local CurTime = timer.curtime
+
+hook.add( "KeyPress", chipName, function( ply, key )
+    if ply:getVehicle() ~= entity then return end
+    keys[ key ] = true
+end )
+
+hook.add( "KeyRelease", chipName, function( ply, key )
+    if ply:getVehicle() ~= entity then return end
+    keys[ key ] = false
+end )
+
+local curTime = CurTime()
+local lastThink = curTime
+
+hook.add( "think", chipName, function()
+    if not ( entity and entity:isValid() ) then
+        entity = prop.createSent( chip:localToWorld( spawnOffset ), chip:getAngles(), "Seat_Airboat", false )
+    end
+
+    phys = entity:getPhysicsObject()
+    if not ( phys and phys:isValid() ) then return end
+
+    local ply = entity:getDriver()
+    local inVehicle = ply and ply:isValid()
+
+    if phys:isGravityEnabled() then
+        phys:enableGravity( false )
+    end
+
+    if phys:isAsleep() then
+        phys:wake()
+    end
+
+    curTime = CurTime()
+
+    local delta = curTime - lastThink
+    lastThink = curTime
+
+    local diff = ( entity:worldToLocalAngles( chip:getAngles() ) - entity:worldToLocalAngles( phys:getAngles() ) ) * delta * 360
+    phys:setAngleVelocity( Vector( diff[ 3 ], diff[ 1 ], diff[ 2 ] ) )
+
+    if not inVehicle then
+        if entity:getNoDraw() then
+            entity:setNoDraw( false )
+        end
+
+        local velocity = phys:getVelocity()
+        if velocity[ 1 ] < 1 then
+            velocity[ 1 ] = 0
+        end
+
+        if velocity[ 2 ] < 1 then
+            velocity[ 2 ] = 0
+        end
+
+        if ( entity:getPos()[ 3 ] - chip:getPos()[ 3 ] ) > spawnOffset[ 3 ] then
+            velocity[ 3 ] = -speedZ
+        elseif velocity[ 3 ] < 1 then
+            velocity[ 3 ] = 0
+        end
+
+        phys:setVelocity( velocity - velocity * timer.frametime() )
+        return
+    end
+
+    if not entity:getNoDraw() then
+       entity:setNoDraw( true )
+    end
+
+    local eyeAngles = ply:getEyeAngles()
+    local velocity = Vector()
+
+    -- JUMP
+    if keys[ 2 ] then
+        velocity:add( eyeAngles:getUp() * speedZ )
+    end
+
+    -- ALT
+    if keys[ 262144 ] then
+        velocity:sub( eyeAngles:getUp() * speedZ )
+    end
+
+    -- W
+    if keys[ 8 ] then
+        velocity:add( eyeAngles:getForward() * speedX )
+    end
+
+    -- S
+    if keys[ 16 ] then
+        velocity:sub( eyeAngles:getForward() * speedX )
+    end
+
+    -- A
+    if keys[ 512 ] then
+        velocity:sub( eyeAngles:getRight() * speedY )
+    end
+
+    -- D
+    if keys[ 1024 ] then
+        velocity:add( eyeAngles:getRight() * speedY )
+    end
+
+    -- SHIFT
+    if keys[ 131072 ] then
+        velocity:mul( shiftMultiplier )
+    end
+
+    if velocity:getLength() > 8 then
+        phys:applyForceCenter( velocity )
+    end
+end )
