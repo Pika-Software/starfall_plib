@@ -8,7 +8,7 @@
 -----------------]]--
 
 -- Audio volume in %
-local VOLUME = 100
+local VOLUME = 150
 
 -- TTS hear distantion in hammer units
 local HEAR_DIST = 1024

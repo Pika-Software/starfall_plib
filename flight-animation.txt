@@ -7,7 +7,7 @@ local chipName = "Flight Animation"
 -- [[ CONFIG ]] --
 local alwaysOn = true
 local useMagic = false
-local onVehicleCheck = true
+local onVehicleCheck = false
 local onGroundCheck = false
 local minimalSpeed = 64
 
@@ -37,7 +37,7 @@ local holdTypes = {
 local lastHoldType = nil
 
 hook.add( "think", chipName, function()
-    if not ( owner:isAlive() and ( onVehicleCheck == owner:inVehicle() ) and ( alwaysOn or ( onGroundCheck and not owner:isOnGround() ) or moveTypes[ owner:getMoveType() ] ) ) then
+    if not ( owner:isAlive() and ( not onVehicleCheck or not owner:inVehicle() ) and ( alwaysOn or ( onGroundCheck and not owner:isOnGround() ) or moveTypes[ owner:getMoveType() ] ) ) then
         if owner:isPlayingAnimation() then
             owner:resetAnimation()
         end

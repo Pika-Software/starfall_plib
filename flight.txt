@@ -3,7 +3,7 @@
 --@server
 
 -- [[ Config ]] --
-local speedX, speedY, speedZ = 128, 256, 64
+local speedX, speedY, speedZ = 24, 24, 12
 local shiftMultiplier = 3
 
 -- [[ CODE ]] --
@@ -93,65 +93,87 @@ hook.add( "think", chipName, function()
     local diff = ( entity:worldToLocalAngles( chip:getAngles() ) - entity:worldToLocalAngles( phys:getAngles() ) ) * delta * 360
     phys:setAngleVelocity( Vector( diff[ 3 ], diff[ 1 ], diff[ 2 ] ) )
 
-    if not ( ply and ply:isValid() ) then
-        local velocity = phys:getVelocity()
-        if velocity[ 1 ] < 1 then
+    local velocity = phys:getVelocity()
+
+    if ply and ply:isValid() then
+        local eyeAngles = ply:getEyeAngles()
+
+        local force = Vector()
+
+        -- JUMP
+        if keys[ 2 ] then
+            force:add( eyeAngles:getUp() * speedZ )
+        end
+
+        -- ALT
+        if keys[ 262144 ] then
+            force:sub( eyeAngles:getUp() * speedZ )
+        end
+
+        -- W
+        if keys[ 8 ] then
+            force:add( eyeAngles:getForward() * speedX )
+        end
+
+        -- S
+        if keys[ 16 ] then
+            force:sub( eyeAngles:getForward() * speedX )
+        end
+
+        -- A
+        if keys[ 512 ] then
+            force:sub( eyeAngles:getRight() * speedY )
+        end
+
+        -- D
+        if keys[ 1024 ] then
+            force:add( eyeAngles:getRight() * speedY )
+        end
+
+        -- SHIFT
+        if keys[ 131072 ] then
+            force:mul( shiftMultiplier )
+        end
+
+        if force:getLength() > 1 then
+            velocity:add( force * delta * 10 )
+        end
+    else
+
+        if velocity[ 1 ] < 0.1 then
             velocity[ 1 ] = 0
         end
 
-        if velocity[ 2 ] < 1 then
+        if velocity[ 2 ] < 0.1 then
             velocity[ 2 ] = 0
         end
 
-        if ( entity:getPos()[ 3 ] - chip:getPos()[ 3 ] ) > spawnOffset[ 3 ] then
-            velocity[ 3 ] = -speedZ
-        elseif velocity[ 3 ] < 1 then
+        if velocity[ 3 ] < 0.1 then
             velocity[ 3 ] = 0
+        elseif ( entity:getPos()[ 3 ] - chip:getPos()[ 3 ] ) > spawnOffset[ 3 ] then
+            velocity[ 3 ] = -speedZ
         end
-
-        phys:setVelocity( velocity - velocity * timer.frametime() )
-        return
     end
 
-    local eyeAngles = ply:getEyeAngles()
-    local velocity = Vector()
+    delta = delta * 10
 
-    -- JUMP
-    if keys[ 2 ] then
-        velocity:add( eyeAngles:getUp() * speedZ )
+    if velocity[ 1 ] > 0 then
+        velocity[ 1 ] = velocity[ 1 ] - delta
+    else
+        velocity[ 1 ] = velocity[ 1 ] + delta
     end
 
-    -- ALT
-    if keys[ 262144 ] then
-        velocity:sub( eyeAngles:getUp() * speedZ )
+    if velocity[ 2 ] > 0 then
+        velocity[ 2 ] = velocity[ 2 ] - delta
+    else
+        velocity[ 2 ] = velocity[ 2 ] + delta
     end
 
-    -- W
-    if keys[ 8 ] then
-        velocity:add( eyeAngles:getForward() * speedX )
+    if velocity[ 3 ] > 0 then
+        velocity[ 3 ] = velocity[ 3 ] - delta
+    else
+        velocity[ 3 ] = velocity[ 3 ] + delta
     end
 
-    -- S
-    if keys[ 16 ] then
-        velocity:sub( eyeAngles:getForward() * speedX )
-    end
-
-    -- A
-    if keys[ 512 ] then
-        velocity:sub( eyeAngles:getRight() * speedY )
-    end
-
-    -- D
-    if keys[ 1024 ] then
-        velocity:add( eyeAngles:getRight() * speedY )
-    end
-
-    -- SHIFT
-    if keys[ 131072 ] then
-        velocity:mul( shiftMultiplier )
-    end
-
-    if velocity:getLength() > 8 then
-        phys:applyForceCenter( velocity )
-    end
+    phys:setVelocity( velocity )
 end )
