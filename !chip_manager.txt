@@ -22,6 +22,7 @@ local CHIPS = {
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
     ['shield'] = { SERVER, false },
+    ['flight'] = { SERVER, true },
     ['blink'] = { SERVER, true },
     ['tts'] = { SHARED, true },
 

@@ -73,6 +73,10 @@ hook.add( "think", chipName, function()
 
     local ply = entity:getDriver()
 
+    if entity:isFrozen() then
+        phys:enableMotion( true )
+    end
+
     if phys:isGravityEnabled() then
         phys:enableGravity( false )
     end
