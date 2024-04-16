@@ -29,7 +29,7 @@ local moveTypes = {
 }
 
 local holdTypes = {
-    [ "normal" ] = useMagic and "magic" or "passive",
+    [ "normal" ] = useMagic and "magic" or "all",
     [ "physgun" ] = "gravgun",
     [ "smg" ] = "smg1"
 }
@@ -45,9 +45,12 @@ hook.add( "think", chipName, function()
         return
     end
 
-    local weapon, holdType = owner:getActiveWeapon(), "normal"
-    if weapon and weapon:isValid() then
-        holdType = weapon:getHoldType() or "normal"
+    local holdType = "normal"
+    if not owner:inVehicle() then
+        local weapon = owner:getActiveWeapon()
+        if weapon and weapon:isValid() then
+            holdType = weapon:getHoldType() or "normal"
+        end
     end
 
     if owner:isPlayingAnimation() and holdType == lastHoldType then
