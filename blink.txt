@@ -43,6 +43,10 @@ do
                     pos = downTrace.HitPos + aimVector * -10 + upOffset
                 end
 
+                if not pos:isInWorld() then
+                    pos = pos + ply:getAimVector() * 128
+                end
+
                 plib.TeleportOwner( pos )
             end
         end

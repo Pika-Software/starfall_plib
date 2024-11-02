@@ -7,11 +7,11 @@
     Configuration
 -----------------]]--
 
--- Bind - bind k +grenade2
-local BIND = 16777216
+-- Bind - bind k +alt1
+local BIND = 16384
 
 -- Prop Model
-local PROP_MODEL = 'models/props_c17/oildrum001_explosive.mdl'
+local PROP_MODEL = 'models/props_junk/garbage_glassbottle003a.mdl'
 
 -- Prop pushing speed
 local PROP_FORCE = 1000000
@@ -27,37 +27,39 @@ local PROP_IGNITE = true
 -----------------]]--
 dofile( 'starfall_plib/init.txt' )
 local chipName = 'PLib - Prop Gun'
+local localToWorld = localToWorld
 local timer_simple = timer.simple
 local isValid = isValid
 local CurTime = CurTime
 local plib = plib
+
+local angOffset = Angle( 90, 0, 0 )
 
 hook.add('KeyPress', chipName, function(ply, key)
     if plib.IsOwner( ply ) and (key == BIND) then
         if (ply[ chipName ] or 0) > CurTime() then return end
         ply[ chipName ] = CurTime() + 0.025
 
-        local ang = ply:getEyeAngles()
-        if ply:inVehicle() then
-            ang[1] = ang[1] + 25
-        end
+        local maxs = ply:obbMaxs()
+        maxs[ 1 ] = 0; maxs[ 2 ] = 0
 
-        local pos = ply:localToWorld( ang:getForward() * 10 )  + ply:getVelocity()
-
-
+        local pos, ang = localToWorld( maxs, angOffset, ply:getPos(), ply:getEyeAngles() )
+        pos = pos + ply:getAimVector() * ( 16 + ply:getVelocity():getLength() )
         local ok, ent = pcall( prop.create, pos, ang, PROP_MODEL )
         if (ok) then
+            ent:emitSound( "Trainyard.ba_thatbeer02" )
+
             timer_simple(0.025, function()
-                if isValid( ent ) then
+                if ent:isValid() and ply:isValid() then
                     if PROP_IGNITE then
                         ent:ignite( 128, 0 )
                     end
-
+        
                     local phys = ent:getPhysicsObject()
                     if isValid( phys ) then
                         phys:setMass( PROP_MASS )
                         phys:addGameFlags( FVPHYSICS.DMG_DISSOLVE )
-                        phys:addVelocity( ang:getForward() * PROP_FORCE )
+                        phys:addVelocity( ply:getAimVector() * PROP_FORCE )
                     end
                 end
             end)
@@ -65,3 +67,10 @@ hook.add('KeyPress', chipName, function(ply, key)
     end
 end)
 
+--[[
+hook.add("", chipName, function( ent )
+    bass.loadFile(string path, string flags, function callback)
+    
+end )
+
+--]]

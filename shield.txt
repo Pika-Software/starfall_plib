@@ -1,34 +1,30 @@
 --@name Shield
 --@author PrikolMen:-b
---@includedir starfall_plib
 --@server
-
---[[-----------------
-         Code
------------------]]--
-dofile( 'starfall_plib/init.txt' )
-local chipName = 'PLib - Shield'
+local localToWorld = localToWorld
 local pcall = pcall
-local plib = plib
-local hook = hook
 
-local shield = nil
-hook.add('think', chipName, function()
-    if isValid( shield ) then
-        shield:setNoDraw( true )
-        shield:setCollisionGroup( 11 )
-        shield:setAngles( plib.Owner:getAngles() )
-        shield:setPos( plib.GetEntityCenterPos( plib.Owner ) )
+local owner = owner()
+local ok, shield = false, nil
+local offset, angles = Vector( 0, 0, 40 ), Angle( 0, 0, 90 )
+
+hook.add( 'think', 'Shield', function()
+    if ok and shield and shield:isValid() then
+        if not shield:getNoDraw() then
+            shield:setNoDraw( true )
+        end
+
+        if shield:getCollisionGroup() ~= 11 then
+            shield:setCollisionGroup( 11 )
+        end
+
+        local pos, ang = localToWorld( shield:obbCenter() + offset, angles, owner:getPos(), owner:getAngles() )
+        shield:setPos( pos ); shield:setAngles( ang )
 
         if shield:isOnFire() then
             shield:extinguish()
         end
-
-        return
+    else
+        ok, shield = pcall( prop.create, owner:getPos(), owner:getAngles(), 'models/hunter/blocks/cube1x2x1.mdl', true )
     end
-
-    local ok, ent = pcall( prop.create, plib.GetEntityCenterPos( plib.Owner ), plib.Owner:getAngles(), 'models/hunter/blocks/cube6x6x6.mdl', true )
-    if (ok) then
-        shield = ent
-    end
-end)
+end )

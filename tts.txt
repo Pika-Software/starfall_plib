@@ -28,6 +28,12 @@ local DEAD_CANT_HEAR = true
 -- Hide messages in chat
 local HIDE_CHAT_MESSAGES = false
 
+-- TTS dictionary
+local DICTONARY = {
+    --{ '%p+', ' ' },
+    --{ '^кст(%p+)$', 'кстати%s' },
+}
+
 --[[-----------------
          Code
 -----------------]]--
@@ -94,6 +100,7 @@ end
 if (SERVER) then
 
     local find_inSphere = find.inSphere
+    local string_gsub = string.gsub
 
     local function tts( ply, text, isTeam )
         local whoHear = {}
@@ -103,6 +110,30 @@ if (SERVER) then
                 whoHear[ #whoHear + 1 ] = pl
             end
         end
+
+        --[[
+        local words = string.explode( '%s+', text, true )
+
+        local dLength = #DICTONARY
+        for i = 1, #words do
+            local word = words[ i ]
+            for j = 1, dLength do
+                local data = DICTONARY[ j ]
+                local newWord = string_gsub( word, data[ 1 ], function( ... )
+                    return string.format( data[ 2 ], ... )
+                end )
+
+                if newWord ~= word then
+                    words[ i ] = newWord
+                    break
+                end
+            end
+        end
+
+        text = table.concat( words, ' ' )
+
+        print( text )
+        --]]
 
         if #whoHear > 0 then
             net.start( chipName )

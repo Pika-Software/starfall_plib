@@ -14,7 +14,7 @@ local CLIENT_DEATH_COLOR = Color( 250, 50, 50 )
 local CLIENT_IGNORE_FRIENDS = false
 
 -- Update Time
-local CLIENT_UPDATE_TIME = 0.025
+local CLIENT_UPDATE_TIME = 0.05
 
 -- Player Filters
 local SERVER_IGNORE_SUPERADMINS = false
@@ -45,40 +45,27 @@ if (CLIENT) then
 
     local hudEnabled = plib.EnableHUD( true )
     if (hudEnabled) then
-        local isValid = isValid
-        local pairs = pairs
-
         local players = {}
         local playersRender = {}
         local function updatePlayerRender()
-            for key, _ in pairs( playersRender ) do
-                playersRender[ key ] = nil
+            for i = 1, #playersRender do
+                playersRender[ i ] = nil
             end
 
             for _, ply in ipairs( players ) do
-                if !isValid( ply ) then continue end
-                if CLIENT_IGNORE_FRIENDS and (ply:getFriendStatus() == 'friend') then continue end
-                local pos = ply:getPos()
-                local screenData = pos:toScreen()
-                if (screenData) then
-                    table.insert(playersRender, {
-                        ply:getName(),
-                        plib.LerpColor( 1 - ( ply:getHealth() / ply:getMaxHealth() ), plib.GetPlayerTeamColor( ply ), CLIENT_DEATH_COLOR ),
-                        pos,
-                        ply:getAngles(),
-                        ply:obbMins(),
-                        ply:obbMaxs(),
-                        screenData.x,
-                        screenData.y,
-                        screenData.visible
-                    })
+                if ply and ply:isValid() and not ply:isDormant() and ( not CLIENT_IGNORE_FRIENDS or ply:getFriendStatus() ~= 'friend' ) then
+                    local pos = ply:getPos()
+                    local screenData = pos:toScreen()
+                    if (screenData) then
+                        playersRender[ #playersRender + 1 ] = { ply:getName(), plib.LerpColor( 1 - ( ply:getHealth() / ply:getMaxHealth() ), plib.GetPlayerTeamColor( ply ), CLIENT_DEATH_COLOR ), pos, ply:getAngles(), ply:obbMins(), ply:obbMaxs(), screenData.x, screenData.y, screenData.visible }
+                    end
                 end
             end
         end
 
         net.receive(chipName, function()
-            for key, _ in pairs( players ) do
-                players[ key ] = nil
+            for i = 1, #players do
+                players[ i ] = nil
             end
 
             for _, ply in ipairs( net.readTable() ) do
@@ -98,8 +85,10 @@ if (CLIENT) then
 
             local render = render
 
-            hook.add('postdrawtranslucentrenderables', chipName, function()
-                for _, info in ipairs( playersRender ) do
+            hook.add('postdrawtranslucentrenderables', chipName, function(_, skybox)
+                if skybox then return end
+                for i = 1, #playersRender do
+                    local info = playersRender[ i ]
                     render.clearDepth()
                     render.setColor( info[2] )
                     render.draw3DWireframeBox( info[3], info[4], info[5], info[6] )
@@ -107,7 +96,8 @@ if (CLIENT) then
             end)
 
             hook.add('drawhud', chipName, function()
-                for _, info in ipairs( playersRender ) do
+                for i = 1, #playersRender do
+                    local info = playersRender[ i ]
                     if (info[9]) then
                         render.setColor( info[2] )
                         render.drawSimpleText( info[7], info[8], info[1], 1, 2 )
