@@ -8,13 +8,13 @@ dofile( 'starfall_plib/init.txt' )
     Configuration
 -----------------]]--
 local CHIPS = {
-    ['entity_teleporter'] = { SERVER, false },
+    ['entity_teleporter'] = { SERVER, true },
     ['flight-animation'] = { CLIENT, true },
     ['chat_translator'] = { SHARED, false },
     ['atmosphere_hud'] = {CLIENT, false },
     ['jiggles_flex'] = { CLIENT, false },
     ['auto_respawn'] = { SERVER, false },
-    ['wall_watcher'] = { SHARED, true },
+    ['wall_watcher'] = { SHARED, false },
     ['anti_blind'] = { CLIENT, false },
     ['test_site'] = { SHARED, false },
     ['reflection'] = { SERVER, false },
@@ -25,6 +25,7 @@ local CHIPS = {
     ['flight'] = { SERVER, true },
     ['blink'] = { SERVER, true },
     ['tts'] = { SHARED, true },
+    ['jail'] = { SERVER, true },
 
     -- Ultrakill
     ['blood_is_fuel'] = { SERVER, false },

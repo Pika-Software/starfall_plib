@@ -1,0 +1,26 @@
+--@name Owner Ghost
+--@author
+--@client
+
+local entity = chip()
+local ply = owner()
+
+local size = 1
+local holo = hologram.create( entity:getPos(), entity:getAngles(), ply:getModel(), Vector( size, size, size ) )
+
+if player() == owner() then
+    enableHud(owner(), true)
+end
+
+holo:setParent( ply )
+holo:addEffects( 1 )
+
+holo:setNoDraw( true )
+
+hook.add( "predrawtranslucentrenderables", "fuck", function()
+    local matrix = Matrix()
+    matrix:setTranslation( Vector( 10, 10, 0 ) )
+    render.pushMatrix( matrix, false)
+    holo:draw()
+    render.popMatrix()
+end )

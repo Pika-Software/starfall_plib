@@ -1,0 +1,124 @@
+--@name Entity Finder
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@shared
+
+--[[-----------------
+    Configuration
+-----------------]]--
+
+local CLASSES = {
+    func_button = true,
+    trigger_teleport = true,
+    info_teleport_destination = true
+}
+
+-- Update Time
+local CLIENT_UPDATE_TIME = 0.05
+
+-- Update Time
+local SERVER_UPDATE_TIME = 1
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local ipairs = ipairs
+local table = table
+local plib = plib
+local net = net
+
+local chipName = 'PLib - Wall Watcher'
+
+if (CLIENT) then
+
+    plib.EnableHUD( true )
+    local entities = {}
+    local function updatePlayerRender()
+        for _, data in ipairs( entities ) do
+            local screenData = data[3]:toScreen()
+            if screenData then
+                data[ 7 ] = screenData.x
+                data[ 8 ] = screenData.y
+                data[ 9 ] = screenData.visible
+            else
+                data[ 7 ] = 0
+                data[ 8 ] = 0
+                data[ 9 ] = false
+            end
+        end
+    end
+
+    net.receive(chipName, function()
+        entities = net.readTable()
+        updatePlayerRender()
+    end)
+
+    timer.create(chipName, CLIENT_UPDATE_TIME, 0, updatePlayerRender)
+
+    --[[------------------
+            Render
+    ------------------]]--
+
+    do
+
+        local render = render
+
+        hook.add('postdrawtranslucentrenderables', chipName, function(_, skybox)
+            if skybox then return end
+            for i = 1, #entities do
+                local info = entities[ i ]
+                render.clearDepth()
+                render.setColor( info[2] )
+                render.draw3DWireframeBox( info[3], info[4], info[5], info[6] )
+            end
+        end)
+
+        local color_white = Color( 255, 255, 255 )
+
+        hook.add('drawhud', chipName, function()
+            for i = 1, #entities do
+                local info = entities[ i ]
+                render.setColor( color_white )
+                render.drawSimpleText( info[7], info[8], info[1], 1, 2 )
+            end
+        end)
+
+    end
+
+end
+
+if (SERVER) then
+
+    local find_all = find.all
+    timer.create(chipName, SERVER_UPDATE_TIME, 0, function()
+        local entities = {}
+        for _, ent in ipairs( find_all() ) do
+            if CLASSES[ ent:getClass() ] and not plib.IsOwner( ent ) then
+                table.insert( entities, {
+                    ent:getClass(),
+                    ent:getColor(),
+                    ent:getPos(),
+                    ent:getAngles(),
+                    ent:obbMins(),
+                    ent:obbMaxs()
+                } )
+            end
+        end
+
+        if #entities < 1 then return end
+
+        local players = {}
+
+        for _, ply in ipairs( find.allPlayers() ) do
+            if ply:isHUDActive() then
+                table.insert( players, ply )
+            end
+        end
+
+        net.start( chipName )
+        net.writeTable( entities )
+        net.send( players )
+    end)
+
+end

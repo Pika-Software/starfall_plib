@@ -8,7 +8,7 @@
 -----------------]]--
 local CHAT_COMMAND = '/pjail'
 local CHAT_COMMAND2 = '/punjail'
-local LOCK_TARGET = false
+local LOCK_TARGET = true
 
 --[[-----------------
          Code
@@ -31,11 +31,6 @@ plib.ChatCommandAdd(CHAT_COMMAND, function( pl, _, __, nickName )
             plib.Log( chipName, 'Jailed: ' .. target:getName() )
         end
     end
-end)
-
-plib.ChatCommandAdd(CHAT_COMMAND2, function( pl, _, __, nickName )
-    if !plib.IsOwner( pl ) then return end
-    ply = nil
 end)
 
 local walls = {
@@ -78,6 +73,18 @@ if !LOCK_TARGET then
         wall.Pos[3] = wall.Pos[3] - 1
     end
 end
+
+plib.ChatCommandAdd(CHAT_COMMAND2, function( pl, _, __, nickName )
+    if !plib.IsOwner( pl ) then return end
+    ply = nil
+
+    for _, tbl in ipairs( walls ) do
+        local fence = tbl.Entity
+        if IsValid( fence ) then
+            fence:remove()
+        end 
+    end
+end)
 
 hook.add('think', chipName, function()
     if IsValid( ply ) and ply:isAlive() then
