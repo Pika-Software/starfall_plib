@@ -1,0 +1,45 @@
+--@name sky_camera
+--@author PrikolMen:-b
+--@server
+
+local chip = chip()
+
+local startPos = chip:getPos()
+
+local offset = Vector( 0, 0, 24 )
+local angle_zero = Angle()
+
+local ok, entity = pcall( prop.createSent, startPos + offset, angle_zero, "Seat_Airboat", true )
+if not ok then
+    chip:remove()
+    return
+end
+
+chip:setPos( startPos + offset )
+chip:setParent( entity )
+chip:setNoDraw( true )
+chip:setSolid( false )
+
+local oldPos = entity:getPos()
+local function returnToBase()
+    entity:setPos( oldPos )
+end
+
+local spotPos = Vector( 10220, 9205, -9164 )
+
+hook.add( "PlayerEnteredVehicle", "SecretSpot", function( ply, vehicle )
+    if vehicle == entity then
+        local cams = find.byClass( "sky_camera" )
+        if #cams == 0 then
+            return
+        end
+
+        oldPos = entity:getPos()
+        entity:setPos( cams[ math.random(1, #cams ) ]:getPos() )
+        entity:ejectDriver()
+
+        timer.simple( 0, returnToBase )
+    end
+end )
+
+
