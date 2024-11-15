@@ -68,7 +68,11 @@ local walls = {
     },
 }
 
-if !LOCK_TARGET then
+if LOCK_TARGET then
+    for _, wall in ipairs( walls ) do
+        wall.Pos[3] = wall.Pos[3] + 4
+    end
+else
     for _, wall in ipairs( walls ) do
         wall.Pos[3] = wall.Pos[3] - 1
     end
