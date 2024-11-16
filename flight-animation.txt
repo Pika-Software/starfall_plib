@@ -12,13 +12,15 @@ local onGroundCheck = true
 local minimalSpeed = 64
 
 -- [[ CODE ]] --
-local owner = owner()
-owner:resetAnimation()
+local ownerEntity = owner()
+ownerEntity:resetAnimation()
 
 local allowedSequences = {}
-for key, value in pairs( owner:getSequenceList() ) do
-    if not value:find( "swim" ) then continue end
-    allowedSequences[ value ] = true
+if ownerEntity and ownerEntity:isValid() then
+    for _, value in pairs( ownerEntity:getSequenceList() ) do
+        if not value:find( "swim" ) then continue end
+        allowedSequences[ value ] = true
+    end
 end
 
 -- https://wiki.facepunch.com/gmod/Enums/MOVETYPE
@@ -37,27 +39,32 @@ local holdTypes = {
 local lastHoldType = nil
 
 hook.add( "think", chipName, function()
-    if not ( owner:isAlive() and ( not onVehicleCheck or not owner:inVehicle() ) and ( alwaysOn or ( onGroundCheck and not owner:isOnGround() ) or moveTypes[ owner:getMoveType() ] ) ) or owner:isCrouching() then
-        if owner:isPlayingAnimation() then
-            owner:resetAnimation()
+    if not ( ownerEntity and ownerEntity:isValid() ) then
+        ownerEntity = owner()
+        return
+    end
+
+    if not ( ownerEntity:isAlive() and ( not onVehicleCheck or not ownerEntity:inVehicle() ) and ( alwaysOn or ( onGroundCheck and not ownerEntity:isOnGround() ) or moveTypes[ ownerEntity:getMoveType() ] ) ) or ownerEntity:isCrouching() then
+        if ownerEntity:isPlayingAnimation() then
+            ownerEntity:resetAnimation()
         end
 
         return
     end
 
     local holdType = "normal"
-    if not owner:inVehicle() then
-        local weapon = owner:getActiveWeapon()
+    if not ownerEntity:inVehicle() then
+        local weapon = ownerEntity:getActiveWeapon()
         if weapon and weapon:isValid() then
             holdType = weapon:getHoldType() or "normal"
         end
     end
 
-    if owner:isPlayingAnimation() and holdType == lastHoldType then
-        if owner:getVelocity():getLength2D() > minimalSpeed then
-            owner:setAnimationRate( 0 )
+    if ownerEntity:isPlayingAnimation() and holdType == lastHoldType then
+        if ownerEntity:getVelocity():getLength2D() > minimalSpeed then
+            ownerEntity:setAnimationRate( 0 )
         else
-            owner:setAnimationRate( 0.25 )
+            ownerEntity:setAnimationRate( 0.25 )
         end
 
         return
@@ -70,21 +77,19 @@ hook.add( "think", chipName, function()
         sequenceName = "swimming_" .. holdTypes.normal
     end
 
-    owner:setAnimation( sequenceName, owner:getAnimationProgress() or 0, 0, true, true )
+    ownerEntity:setAnimation( sequenceName, ownerEntity:getAnimationProgress() or 0, 0, true, true )
 end )
 
 local find = string.find
 
 hook.add( "EntityEmitSound", chipName, function( data )
-    if data.Entity == owner and owner:isPlayingAnimation() then
-        if find( data.SoundName, "player/footsteps/.+" ) then
-            return false
-        end
+    if data.Entity == ownerEntity and ownerEntity:isPlayingAnimation() and find( data.SoundName, "player/footsteps/.+" ) then
+        return false
     end
 end )
 
 hook.add( "Removed", chipName, function()
-    if owner:isValid() then
-        owner:resetAnimation()
+    if ownerEntity and ownerEntity:isValid() then
+        ownerEntity:resetAnimation()
     end
 end )
