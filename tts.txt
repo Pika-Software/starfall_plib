@@ -17,7 +17,7 @@ local HEAR_DIST = 1024
 local AUTO_TTS = true
 
 -- TTS by chat command
-local CHAT_COMMAND = '/ptts'
+local CHAT_COMMAND = '~tts'
 
 -- Dead Palyers can't talk?
 local DEAD_CANT_TALK = true

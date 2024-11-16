@@ -6,7 +6,7 @@
 --[[-----------------
     Configuration
 -----------------]]--
-local CHAT_COMMAND = '/pnpc'
+local CHAT_COMMAND = '~npc'
 local DISTANCE = 10000
 
 --[[-----------------

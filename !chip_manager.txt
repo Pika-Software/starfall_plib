@@ -17,7 +17,7 @@ local CHIPS = {
     ['wall_watcher'] = { SHARED, true },
     ['anti_blind'] = { CLIENT, false },
     ['test_site'] = { SHARED, false },
-    ['reflection'] = { SERVER, true },
+    ['reflection'] = { SERVER, false },
     ['prop_gun'] = { SERVER, true },
     ['healing'] = { SERVER, true },
     ['respawn'] = { SHARED, true },
@@ -26,7 +26,8 @@ local CHIPS = {
     ['blink'] = { SERVER, true },
     ['tts'] = { SHARED, true },
     ['jail'] = { SERVER, true },
-    ['chip_ban'] = { SERVER, false },
+    ['tool_ban'] = { SERVER, true },
+    ['commands'] = { SERVER, true },
 
     -- Ultrakill
     ['blood_is_fuel'] = { SERVER, false },

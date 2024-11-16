@@ -6,7 +6,7 @@
 --[[-----------------
     Configuration
 -----------------]]--
-local CHAT_COMMAND = '/ptpe'
+local CHAT_COMMAND = '~tpe'
 
 --[[-----------------
          Code

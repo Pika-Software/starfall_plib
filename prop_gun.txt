@@ -54,11 +54,11 @@ hook.add('KeyPress', chipName, function(ply, key)
                     if PROP_IGNITE then
                         ent:ignite( 128, 0 )
                     end
-        
+
                     local phys = ent:getPhysicsObject()
                     if isValid( phys ) then
                         phys:setMass( PROP_MASS )
-                        phys:addGameFlags( FVPHYSICS.DMG_DISSOLVE )
+                        phys:addGameFlags( 512 )
                         phys:addVelocity( ply:getAimVector() * PROP_FORCE )
                     end
                 end
@@ -70,7 +70,7 @@ end)
 --[[
 hook.add("", chipName, function( ent )
     bass.loadFile(string path, string flags, function callback)
-    
+
 end )
 
 --]]

@@ -27,6 +27,9 @@ hook.Remove = hook.remove
 timer.Simple = timer.simple
 SHARED = CLIENT or SERVER
 
+angle_zero = Angle( 0, 0, 0 )
+local angle_zero = angle_zero
+
 do
 
     local debug_getinfo = debug.getinfo
@@ -153,36 +156,35 @@ if (SERVER) then
 
     local prop = prop
 
-    do
-        local NULL = NULL
-        function plib.CreateEntity( class, pos, ang, frozen, extraData )
-            ArgAssert( class, 1, 'string' )
-            local ok, ent = pcall( prop.createSent, pos or plib.Chip:getPos(), ang or plib.Chip:getAngles(), class, frozen or false, extraData )
-            return ok and ent or NULL
-        end
+    function plib.CreateEntity( class, pos, ang, frozen, extraData )
+        ArgAssert( class, 1, 'string' )
+        local ok, ent = pcall( prop.createSent, pos or plib.Chip:getPos(), ang or plib.Chip:getAngles(), class, frozen or false, extraData )
+        return ok and ent or NULL
     end
 
-    function plib.KillPlayer( ply )
-        local maxs = ply:obbMaxs()
-        maxs[1] = 0
-        maxs[2] = 0
-        maxs[3] = maxs[3] + 5
-        local ok, ent = pcall( prop.create, ply:localToWorld( maxs ), ply:getAngles(), 'models/props_junk/PopCan01a.mdl', false )
-        if ok and isValid( ent ) then
-            local phys = ent:getPhysicsObject()
-            if isValid( phys ) then
-                phys:setMass( 1000000 )
-                phys:addGameFlags( FVPHYSICS.DMG_DISSOLVE )
-                phys:addVelocity( Vector( 0, 0, -1000000 ) )
-            end
-
-            timer.simple( 0.25, function()
-                if isValid( ent ) then
-                    ent:remove()
-                end
-            end )
-
+    function plib.KillPlayer( ply, attacker, inflictor )
+        if pcall( ply.applyDamage, ply, ply:getHealth() + ply:getArmor(), attacker or ply, inflictor or ply ) then
             return true
+        end
+
+        local mins, maxs = ply:getModelBounds()
+        local ok, entity = pcall( prop.create, ply:localToWorld( ( mins + maxs ) * 1.5 ), angle_zero, 'models/props_junk/garbage_glassbottle003a.mdl', false )
+        if ok and entity:isValid() then
+            entity:setNoDraw( true )
+            entity:setSolid( true )
+            entity:enableDrag( false )
+            entity:enableMotion( true )
+            entity:setCollisionGroup( 0 )
+            entity:enableGravity( false )
+
+            local phys = entity:getPhysicsObject()
+            if phys and phys:isValid() then
+                phys:addVelocity( ( ( ply:getPos() + ply:getVelocity() * timer.frametime() ) - entity:getPos() ) * 100000 )
+                phys:addGameFlags( 512 )
+                phys:setMass( 1000000 )
+                phys:wake()
+                return true
+            end
         end
 
         return false
@@ -418,10 +420,6 @@ end
 
 function plib.KillOwner()
     RunConsoleCommand( 'kill' )
-end
-
-function plib.KillPlayer( ply, attacker, inflictor )
-    return pcall( ply.applyDamage, ply, ply:getHealth(), attacker or ply, inflictor or ply )
 end
 
 do

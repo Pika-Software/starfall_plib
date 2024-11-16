@@ -6,68 +6,84 @@
 --[[-----------------
     Configuration
 -----------------]]--
-local CHAT_COMMAND = '/pjail'
-local CHAT_COMMAND2 = '/punjail'
-local LOCK_TARGET = true
+local CHAT_COMMAND = '~jail'
+local CHAT_COMMAND2 = '~unjail'
 
 --[[-----------------
          Code
 -----------------]]--
 dofile( 'starfall_plib/init.txt' )
-local model = 'models/props_building_details/Storefront_Template001a_Bars.mdl'
 local chipName = 'PLib - Jail'
 local pcall = pcall
 local plib = plib
 local hook = hook
 
-local ply = nil
+local lst, len = {}, 0
+
 plib.ChatCommandAdd(CHAT_COMMAND, function( pl, _, __, nickName )
     if !plib.IsOwner( pl ) then return end
+
     local plys = find.playersByName( nickName )
-    if (plys) then
-        local target = find.closest( plys, pl:getPos() )
-        if isValid( target ) then
-            ply = target
-            plib.Log( chipName, 'Jailed: ' .. target:getName() )
+    if plys == nil then return end
+
+    local target = find.closest( plys, pl:getPos() )
+    if not ( target and target:isValid() ) then
+        plib.Log( chipName, 'Target not found' )
+        return
+    end
+
+    local steamid = target:getSteamID()
+    len = #lst
+
+    for i = len, 1, -1 do
+        if lst[ i ][ 1 ] == steamid then
+            table.remove( lst, i )
         end
     end
+
+    len = #lst + 1
+    lst[ len ] = { steamid }
+    plib.Log( chipName, 'Jailed: ' .. target:getName() )
 end)
 
-local walls = {
-    {
-        ['Pos'] = Vector( 0, 0, -1 ),
-        ['Ang'] = Angle( 90, 0, 0 )
-    },
-    {
-        ['Pos'] = Vector( 0, 0, 50 * 2 + 1 ),
-        ['Ang'] = Angle( 90, 0, 0 )
-    },
-    {
-        ['Pos'] = Vector( 51, 0, 50 ),
-        ['Ang'] = Angle( 0, 0, 0 )
-    },
-    {
-        ['Pos'] = Vector( -51, 0, 50 ),
-        ['Ang'] = Angle( 0, 180, 0 )
-    },
-    {
-        ['Pos'] = Vector( 0, -30, 29 ),
-        ['Ang'] = Angle( 180, 90, 90 )
-    },
-    {
-        ['Pos'] = Vector( 0, 30, 29 ),
-        ['Ang'] = Angle( 180, -90, 90 )
-    },
-    {
-        ['Pos'] = Vector( 0, -30, 71 ),
-        ['Ang'] = Angle( 180, 90, 90 )
-    },
-    {
-        ['Pos'] = Vector( 0, 30, 71 ),
-        ['Ang'] = Angle( 180, -90, 90 )
-    },
+plib.ChatCommandAdd(CHAT_COMMAND2, function( pl, _, __, nickName )
+    if !plib.IsOwner( pl ) then return end
+
+    local plys = find.playersByName( nickName )
+    if plys == nil then return end
+
+    local target = find.closest( plys, pl:getPos() )
+    if not ( target and target:isValid() ) then
+        plib.Log( chipName, 'Target not found' )
+        return
+    end
+
+    local steamid = target:getSteamID()
+    len = #lst
+
+    for i = lst, 1, -1 do
+        if lst[ i ][ 1 ] == steamid then
+            table.remove( lst, i )
+        end
+    end
+
+    len = #lst
+    plib.Log( chipName, 'Unjailed: ' .. target:getName() )
+end)
+
+
+local w = {
+    { Vector( 0, 0, -1 ), Angle( 90, 0, 0 ) },
+    { Vector( 0, 0, 50 * 2 + 1 ), Angle( 90, 0, 0 ) },
+    { Vector( 51, 0, 50 ), Angle( 0, 0, 0 ) },
+    { Vector( -51, 0, 50 ), Angle( 0, 180, 0 ) },
+    { Vector( 0, -30, 29 ), Angle( 180, 90, 90 ) },
+    { Vector( 0, 30, 29 ), Angle( 180, -90, 90 ) },
+    { Vector( 0, -30, 71 ), Angle( 180, 90, 90 ) },
+    { Vector( 0, 30, 71 ), Angle( 180, -90, 90 ) }
 }
 
+--[[
 if LOCK_TARGET then
     for _, wall in ipairs( walls ) do
         wall.Pos[3] = wall.Pos[3] + 4
@@ -77,35 +93,63 @@ else
         wall.Pos[3] = wall.Pos[3] - 1
     end
 end
+]]
 
-plib.ChatCommandAdd(CHAT_COMMAND2, function( pl, _, __, nickName )
-    if !plib.IsOwner( pl ) then return end
-    ply = nil
+local wlen = #w
 
-    for _, tbl in ipairs( walls ) do
-        local fence = tbl.Entity
-        if IsValid( fence ) then
-            fence:remove()
-        end 
-    end
-end)
+local find_playerBySteamID = find.playerBySteamID
+local prop_canSpawn = prop.canSpawn
+local localToWorld = localToWorld
+local prop_create = prop.create
 
-hook.add('think', chipName, function()
-    if IsValid( ply ) and ply:isAlive() then
-        for _, tbl in ipairs( walls ) do
-            local fence = tbl.Entity
-            if IsValid( fence ) then
-                fence:setAngles( ply:getAngles() + tbl.Ang )
-                fence:setPos( ply:localToWorld( tbl.Pos ) )
-                continue
+local minimalDistance = 100 ^ 2
+
+hook.add( 'think', chipName, function()
+    for i = 1, len, 1 do
+        local ply = find_playerBySteamID( lst[ i ][ 1 ] )
+        if ply and ply:isValid() then
+            local origin = ply:getPos()
+            local isOutside = ply:isAlive() and origin:isInWorld()
+            if isOutside then
+                local entity = w[ 1 ][ 3 ]
+                if entity and entity:isValid() then
+                    isOutside = origin:getDistanceSqr( entity:getPos() ) > minimalDistance
+                end
             end
 
-            if prop.canSpawn() then
-                local ok, ent = pcall( prop.create, ply:localToWorld( tbl.Pos ), ply:getAngles() + tbl.Ang, model, true )
-                if (ok) then
-                    tbl.Entity = ent
+            local angles = ply:getAngles()
+            for j = 1, wlen, 1 do
+                local wdata = w[ j ]
+
+                local entity = wdata[ 3 ]
+                if entity and entity:isValid() then
+                    if isOutside then
+                        local pos, ang = localToWorld( wdata[ 1 ], wdata[ 2 ], origin, angles )
+                        entity:setPos( pos ); entity:setAngles( ang )
+                    end
+                elseif prop_canSpawn() then
+                    local pos, ang, ok = localToWorld( wdata[ 1 ], wdata[ 2 ], origin, angles )
+                    ok, entity = pcall( prop_create, pos, ang, 'models/props_building_details/Storefront_Template001a_Bars.mdl', true )
+                    if ok then
+                        wdata[ 3 ] = entity
+
+                        if entity:isValid() then
+                            entity:setCollisionGroup( 0 )
+                            entity:setSolid( true )
+                            entity:enableDrag( false )
+                            entity:enableMotion( false )
+                            entity:enableGravity( false )
+                        end
+                    end
+                end
+            end
+        else
+            for j = 1, wlen, 1 do
+                local entity = w[ j ][ 3 ]
+                if entity and entity:isValid() then
+                    entity:remove()
                 end
             end
         end
     end
-end)
+end )

@@ -14,7 +14,7 @@ local MAX_DIST = 100000
 local BIND = 8388608
 
 -- Teleport to player by name chat command.
-local CHAT_COMMAND = '/ptp'
+local CHAT_COMMAND = '~tp'
 
 --[[-----------------
          Code

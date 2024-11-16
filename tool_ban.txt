@@ -1,0 +1,97 @@
+--@name Tool Ban
+--@author PrikolMen:-b
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local CHAT_COMMAND = '~tban'
+local CHAT_COMMAND2 = '~tunban'
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local chipName = 'PLib - Tool Ban'
+local pcall = pcall
+local plib = plib
+local hook = hook
+
+local lst, len = {}, 0
+
+plib.ChatCommandAdd(CHAT_COMMAND, function( pl, _, __, nickName )
+    if !plib.IsOwner( pl ) then return end
+
+    local plys = find.playersByName( nickName )
+    if plys == nil then return end
+
+    local target = find.closest( plys, pl:getPos() )
+    if not ( target and target:isValid() ) then
+        plib.Log( chipName, 'Target not found' )
+        return
+    end
+
+    local steamid = target:getSteamID()
+    len = #lst
+
+    for i = len, 1, -1 do
+        if lst[ i ][ 1 ] == steamid then
+            table.remove( lst, i )
+        end
+    end
+
+    len = #lst + 1
+    lst[ len ] = { steamid }
+    plib.Log( chipName, 'Banned: ' .. target:getName() )
+end )
+
+plib.ChatCommandAdd( CHAT_COMMAND2, function( pl, _, __, nickName )
+    if !plib.IsOwner( pl ) then return end
+
+    local plys = find.playersByName( nickName )
+    if plys == nil then return end
+
+    local target = find.closest( plys, pl:getPos() )
+    if not ( target and target:isValid() ) then
+        plib.Log( chipName, 'Target not found' )
+        return
+    end
+
+    local steamid = target:getSteamID()
+    len = #lst
+
+    for i = lst, 1, -1 do
+        if lst[ i ][ 1 ] == steamid then
+            table.remove( lst, i )
+        end
+    end
+
+    len = #lst
+    plib.Log( chipName, 'Unbanned: ' .. target:getName() )
+end)
+
+hook.add( 'think', chipName, function()
+    for i = 1, len, 1 do
+        local ply = find.playerBySteamID( lst[ i ][ 1 ] )
+        if ply and ply:isValid() then
+            local entity = lst[ i ][ 2 ]
+            if entity and entity:isValid() then
+                if ply:isAlive() then
+                    entity:setPos( ply:getEyePos() )
+                    entity:setAngles( ply:getEyeAngles() )
+                end
+            else
+                entity = prop.create( ply:getEyePos(), ply:getEyeAngles(), "models/hunter/blocks/cube1x1x1.mdl" )
+                lst[ i ][ 2 ] = entity
+
+                if entity:isValid() then
+                    entity:setCollisionGroup( 15 )
+                    entity:setNoDraw( true )
+                end
+            end
+        elseif lst[ i ][ 2 ]:isValid() then
+            lst[ i ][ 2 ]:remove()
+        end
+    end
+end )
