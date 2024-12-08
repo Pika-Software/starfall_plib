@@ -24,6 +24,19 @@ plib.ChatCommandAdd( '~swap', function( ply, _, __, nickName )
     ply:setPos( targetPos )
 end )
 
+plib.ChatCommandAdd( '~who', function( ply )
+    local filter = { ply }
+    
+    local parent = ply:getParent()
+    while parent and parent:isValid() do
+        filter[ #filter + 1 ] = parent
+        parent = parent:getParent()
+    end
+
+    local start = ply:getEyePos()
+    plib.Log( chipName, tostring( trace.line( start, start + ply:getAimVector() * 2048, filter ).Entity ) )
+end )
+
 plib.ChatCommandAdd( '~kill', function( ply, _, __, nickName )
     if !plib.IsOwner( ply ) then return end
 

@@ -1,0 +1,40 @@
+--@name Secret Spot
+--@author PrikolMen:-b
+--@server
+
+local chip = chip()
+
+local startPos = chip:getPos()
+
+local offset = Vector( 0, 0, 24 )
+local angle_zero = Angle()
+
+local ok, entity = pcall( prop.createSent, startPos + offset, angle_zero, "Seat_Airboat", true )
+if not ok then
+    chip:remove()
+    return
+end
+
+chip:setPos( startPos + offset )
+chip:setParent( entity )
+chip:setNoDraw( true )
+chip:setSolid( false )
+
+local oldPos = entity:getPos()
+local function returnToBase()
+    entity:setPos( oldPos )
+end
+
+local spotPos = Vector( -1124, -12314, 64 )
+
+hook.add( "PlayerEnteredVehicle", "SecretSpot", function( ply, vehicle )
+    if vehicle == entity then
+        oldPos = entity:getPos()
+        entity:setPos( spotPos )
+        entity:ejectDriver()
+
+        timer.simple( 0, returnToBase )
+    end
+end )
+
+

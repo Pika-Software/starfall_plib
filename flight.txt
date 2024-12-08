@@ -5,6 +5,7 @@
 -- [[ Config ]] --
 local speedX, speedY, speedZ = 24, 24, 12
 local shiftMultiplier = 3
+local NO_COLLIDE = true
 
 -- [[ CODE ]] --
 local chipName = "Flight"
@@ -138,7 +139,15 @@ hook.add( "think", chipName, function()
         if force:getLength() > 1 then
             velocity:add( force * delta * 10 )
         end
+
+        if NO_COLLIDE then
+            entity:setCollisionGroup( 10 )
+        end
     else
+
+        if NO_COLLIDE then
+            entity:setCollisionGroup( 0 )
+        end
 
         if velocity[ 1 ] < 0.1 then
             velocity[ 1 ] = 0

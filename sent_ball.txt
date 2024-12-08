@@ -1,0 +1,19 @@
+--@name sent_ball
+--@author
+--@server
+
+local chipEntity = chip()
+local ownerEntity = owner()
+
+hook.add( "EntityRemoved", "sent_ball", function( entity )
+    if entity:getOwner() ~= ownerEntity or entity:getClass() ~= "sent_ball" then
+        return
+    end
+
+    timer.simple( math.rand( 0.25, 1 ), function()
+        local entity = prop.createSent( chipEntity:getPos(), chipEntity:getAngles(), "sent_ball", true )
+        if entity and entity:isValid() then
+            entity:use()
+        end
+    end )
+end )

@@ -16,6 +16,12 @@ local CLIENT_IGNORE_FRIENDS = false
 -- Update Time
 local CLIENT_UPDATE_TIME = 0.05
 
+-- PVS
+local CLIENT_IGNORE_PVS = false
+
+-- View distance
+local SERVER_MAX_DISTANCE = -1
+
 -- Player Filters
 local SERVER_IGNORE_SUPERADMINS = false
 local SERVER_IGNORE_ADMINS = false
@@ -46,14 +52,13 @@ if (CLIENT) then
     local hudEnabled = plib.EnableHUD( true )
     if (hudEnabled) then
         local players = {}
+
         local playersRender = {}
         local function updatePlayerRender()
-            for i = 1, #playersRender do
-                playersRender[ i ] = nil
-            end
-
+            playersRender = {}
+            
             for _, ply in ipairs( players ) do
-                if ply and ply:isValid() and not ply:isDormant() and ( not CLIENT_IGNORE_FRIENDS or ply:getFriendStatus() ~= 'friend' ) then
+                if ply and ply:isValid() and ( CLIENT_IGNORE_PVS or not ply:isDormant() ) and ( not CLIENT_IGNORE_FRIENDS or ply:getFriendStatus() ~= 'friend' ) then
                     local pos = ply:getPos()
                     local screenData = pos:toScreen()
                     if (screenData) then
@@ -64,12 +69,10 @@ if (CLIENT) then
         end
 
         net.receive(chipName, function()
-            for i = 1, #players do
-                players[ i ] = nil
-            end
-
-            for _, ply in ipairs( net.readTable() ) do
-                table.insert( players, ply )
+            players = {}
+            
+            for i = 1, net.readUInt( 8 ) do
+                players[ i ] = entity( net.readUInt( 8 ) ) 
             end
 
             updatePlayerRender()
@@ -113,25 +116,49 @@ end
 
 if (SERVER) then
 
+    if SERVER_MAX_DISTANCE > 0 then
+        SERVER_MAX_DISTANCE = SERVER_MAX_DISTANCE ^ 2
+    end
+
+    local function isAllowedToSee( ply, origin )
+        if SERVER_MAX_DISTANCE ~= -1 and origin:getDistanceSqr( ply:getEyePos() ) > SERVER_MAX_DISTANCE then return false end
+        if SERVER_IGNORE_BUILDERS and ply.isInBuild and ply:isInBuild() then return false end
+        if SERVER_IGNORE_PVPERS and ply.isInPvp and ply:isInPvp() then return false end
+        if SERVER_IGNORE_SUPERADMINS and ply:isSuperAdmin() then return false end
+        if SERVER_IGNORE_NOCLIP and ply:isNoclipped() then return false end
+        if SERVER_IGNORE_ADMINS and ply:isAdmin() then return false end
+        if SERVER_IGNORE_GOD and ply:hasGodMode() then return false end
+        if SERVER_IGNORE_DEAD and not ply:isAlive() then return false end
+        return true
+    end
+
     local find_allPlayers = find.allPlayers
-    timer.create(chipName, SERVER_UPDATE_TIME, 0, function()
-        local players = {}
-        for _, ply in ipairs( find_allPlayers() ) do
-            if plib.IsOwner( ply ) then continue end
-            if SERVER_IGNORE_DEAD and !ply:isAlive() then continue end
-            if SERVER_IGNORE_ADMINS and ply:isAdmin() then continue end
-            if SERVER_IGNORE_BUILDERS and ply.isInBuild and ply:isInBuild() then continue end
-            if SERVER_IGNORE_PVPERS and ply.isInPvp and ply:isInPvp() then continue end
-            if SERVER_IGNORE_SUPERADMINS and ply:isSuperAdmin() then continue end
-            if SERVER_IGNORE_NOCLIP and ply:isNoclipped() then continue end
-            if SERVER_IGNORE_GOD and ply:hasGodMode() then continue end
-            table.insert( players, ply )
+
+    timer.create( chipName, SERVER_UPDATE_TIME, 0, function()
+        local players, length = {}, 0
+        
+        local ownerEntity = owner()
+        local origin = ownerEntity:getEyePos()
+
+        local entities = find_allPlayers()
+        for i = 1, #entities do
+            local ply = entities[ i ]
+            if ply ~= ownerEntity and isAllowedToSee( ply, origin ) then
+                length = length + 1
+                players[ length ] = ply
+            end
         end
 
-        if (#players < 1) then return end
-        net.start( chipName )
-        net.writeTable( players )
-        net.send( plib.Owner )
-    end)
+        if length ~= 0 then
+            net.start( chipName )
+            net.writeUInt( length, 8 )
+
+            for i = 1, length, 1 do
+                net.writeUInt( players[ i ]:entIndex(), 8 ) 
+            end
+            
+            net.send( ownerEntity )
+        end
+    end )
 
 end

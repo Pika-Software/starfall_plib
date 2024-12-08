@@ -1,15 +1,75 @@
 --@name Shield
 --@author PrikolMen:-b
 --@server
-local localToWorld = localToWorld
-local pcall = pcall
 
-local owner = owner()
-local ok, shield = false, nil
-local offset, angles = Vector( 0, 0, 40 ), Angle( 0, 0, 90 )
+local ownerEntity = owner()
+if not ( ownerEntity and ownerEntity:isValid() ) then
+    chip():remove()
+    return
+end
+
+local ownerOrigin, ownerAngles = ownerEntity:getPos(), ownerEntity:getAngles()
+local ok, holo = pcall( hologram.create, ownerOrigin, ownerAngles, "models/hunter/plates/plate.mdl" )
+if not ( ok and holo and holo:isValid() ) then
+    chip():remove()
+    return
+end
+
+holo:setParent( ownerEntity )
+
+local cover
+ok, cover = pcall( prop.create, ownerOrigin + Vector( 0, 0, 90 ), ownerAngles, 'models/props_phx/construct/metal_plate1.mdl', true )
+if not ( ok and cover and cover:isValid() ) then
+    chip():remove()
+    return
+end
+
+local shield
+ok, shield = pcall( prop.create, ownerOrigin, ownerAngles, 'models/props_phx/construct/metal_tubex2.mdl', true )
+if not ( ok and shield and shield:isValid() ) then
+    chip():remove()
+    return
+end
+
+cover:setParent( shield )
+shield:setParent( holo )
 
 hook.add( 'think', 'Shield', function()
-    if ok and shield and shield:isValid() then
+    if holo and holo:isValid() then
+        if not holo:getNoDraw() then
+            holo:setNoDraw( true )
+        end
+    else
+        chip():remove()
+        return
+    end
+
+    if cover and cover:isValid() then
+        if cover:getMaterial() ~= "" then
+            cover:setMaterial( "" )
+        end
+
+        if not cover:getNoDraw() then
+            cover:setNoDraw( true )
+        end
+
+        if cover:getCollisionGroup() ~= 11 then
+            cover:setCollisionGroup( 11 )
+        end
+
+        if cover:isOnFire() then
+            cover:extinguish()
+        end
+    else
+        chip():remove()
+        return
+    end
+
+    if shield and shield:isValid() then
+        if shield:getMaterial() ~= "" then
+            shield:setMaterial( "" )
+        end
+
         if not shield:getNoDraw() then
             shield:setNoDraw( true )
         end
@@ -18,13 +78,11 @@ hook.add( 'think', 'Shield', function()
             shield:setCollisionGroup( 11 )
         end
 
-        local pos, ang = localToWorld( shield:obbCenter() + offset, angles, owner:getPos(), owner:getAngles() )
-        shield:setPos( pos ); shield:setAngles( ang )
-
         if shield:isOnFire() then
             shield:extinguish()
         end
     else
-        ok, shield = pcall( prop.create, owner:getPos(), owner:getAngles(), 'models/hunter/blocks/cube1x2x1.mdl', true )
+        chip():remove()
+        return
     end
 end )

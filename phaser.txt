@@ -1,0 +1,36 @@
+--@name phaser
+--@author
+--@includedir starfall_plib
+--@server
+
+--[[-----------------
+    Configuration
+-----------------]]--
+local CHAT_COMMAND = '~mph'
+
+--[[-----------------
+         Code
+-----------------]]--
+dofile( 'starfall_plib/init.txt' )
+local plib = plib
+local find = find
+
+plib.ChatCommandAdd(CHAT_COMMAND, function( ply, _, __, nickName )
+    if !plib.IsOwner( ply ) then return end
+    
+    local entity = ply:getEyeTrace().Entity
+    if not ( entity and entity:isValid() ) then
+        plib.Log( "Phaser", "Entity missing." )        
+        return
+    end
+
+    local phys = entity:getPhysicsObject()
+    if phys and phys:isValid() then
+        phys:enableGravity( false )
+        phys:addGameFlags( 512 )
+        phys:enableDrag( false )
+        phys:wake()
+    end
+    
+    plib.Log( "Phaser", tostring( entity ) )
+end )
